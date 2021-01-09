@@ -5,6 +5,20 @@
  */
 
 
+class KeyValuePair<T> {
+
+    public readonly key : string;
+    public value : T;
+
+    
+    constructor(key : string, value : T) {
+
+        this.key = key;
+        this.value = value;
+    }
+}
+
+
 function negMod(m : number, n : number) : number {
 
     m |= 0;

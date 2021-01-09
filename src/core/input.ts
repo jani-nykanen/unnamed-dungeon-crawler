@@ -19,14 +19,34 @@ enum State {
 }
 
 
-// TODO: Make this more proper TypeScript, that is,
-// replace "any" objects with proper data types
+class InputAction {
+
+    public readonly name : string;
+    public readonly key : string;
+    public readonly button1 : number;
+    public readonly button2 : number;
+
+    public state : State;
+
+
+    constructor(name : string, key : string, button1 = -1, button = -2) {
+
+        this.name = name;
+        this.key = key;
+        this.button1 = button1;
+        this.button2 = this.button2;
+
+        this.state = State.Up;
+    }
+}
+
+
 class InputManager {
 
 
-    private keyStates : any;
-    private prevent : any;
-    private actions : any;
+    private keyStates : Array<KeyValuePair<State>>;
+    private prevent : Array<string>;
+    private actions : Array<InputAction>;
 
     private gamepad : GamePadListener;
 
@@ -39,9 +59,9 @@ class InputManager {
 
     constructor() {
 
-        this.keyStates = {};
-        this.prevent = {};
-        this.actions = {};
+        this.keyStates = new Array<KeyValuePair<State>> ();
+        this.prevent = new Array<string> ();
+        this.actions = new Array<InputAction> ();
 
         this.gamepad = new GamePadListener();
 
@@ -80,51 +100,74 @@ class InputManager {
         this.anyKeyPressed = false;
     }
 
+
+    private setKeyState(key : string, s : State) {
+
+        for (let e of this.keyStates) {
+
+            if (e.key == key) {
+
+                e.value = s;
+                return;
+            }
+        }
+    }
+
+
+    // Pushes key to the key state array if it is
+    // not already there
+    private pushKeyState(key : string) {
+
+        for (let e of this.keyStates) {
+
+            if (e.key == key) return;
+        }
+
+        this.keyStates.push(new KeyValuePair<State>(key, State.Up));
+    }
+
     
     public addAction(name : string, key : string, 
         button1 : number, button2 = -1) {
 
-        this.actions[name] = {
-            state: State.Up,
-            key: key,
-            button1: button1,
-            button2: button2
-        };
-        this.prevent[key] = true;
+        this.actions.push(new InputAction(name, key, button1, button2));
+        this.prevent.push(key);
 
         return this;
     }
 
     
-    public keyPressed(key : number) {
+    public keyPressed(key : string) {
 
-        if (this.keyStates[key] != State.Down) {
+        this.pushKeyState(key);
+        if (this.getKeyState(key) != State.Down) {
 
             this.anyKeyPressed = true;
-            this.keyStates[key] = State.Pressed;
+            this.setKeyState(key, State.Pressed);
         }
 
-        return this.prevent[key];
+        return this.prevent.includes(key);
     }
 
 
-    public keyReleased(key : number) {
+    public keyReleased(key : string) {
 
-        if (this.keyStates[key] != State.Up)
-            this.keyStates[key] = State.Released;
+        this.pushKeyState(key);
+        if (this.getKeyState(key) != State.Up)
+            this.setKeyState(key, State.Released);
 
-        return this.prevent[key];
+        return this.prevent.includes(key);
     }
 
 
-    private updateStateArray(arr : Array<State>) {
+    private updateStateArray(arr : Array<KeyValuePair<State>>) {
 
-        for (let k in arr) {
+        for (let a of arr) {
 
-            if (arr[k] == State.Pressed)
-                arr[k] = State.Down;
-            else if(arr[k] == State.Released) 
-                arr[k] = State.Up;
+            if (a.value == State.Pressed)
+                a.value = State.Down;
+            else if(a.value == State.Released) 
+                a.value = State.Up;
         }
     }
 
@@ -144,20 +187,20 @@ class InputManager {
             this.stick = padStick;
         }
         
-        if (this.actions["right"].state & State.DownOrPressed) {
+        if (this.getAction("right") & State.DownOrPressed) {
 
             this.stick.x = 1;
         }
-        else if (this.actions["left"].state & State.DownOrPressed) {
+        else if (this.getAction("left") & State.DownOrPressed) {
 
             this.stick.x = -1;
         }
 
-        if (this.actions["down"].state & State.DownOrPressed) {
+        if (this.getAction("down") & State.DownOrPressed) {
 
             this.stick.y = 1;
         }
-        else if (this.actions["up"].state & State.DownOrPressed) {
+        else if (this.getAction("up") & State.DownOrPressed) {
 
             this.stick.y = -1;
         }
@@ -176,20 +219,17 @@ class InputManager {
 
         this.gamepad.update();
 
-        for (let k in this.actions) {
+        for (let a of this.actions) {
 
-            this.actions[k].state = this.keyStates[this.actions[k].key] | State.Up;
-            if (this.actions[k].state == State.Up) {
+            a.state = this.getKeyState(a.key) | State.Up;
+            if (a.state == State.Up) {
 
-                if (this.actions[k].button1 != null)
-                    this.actions[k].state = this.gamepad
-                        .getButtonState(this.actions[k].button1);
+                if (a.button1 != null)
+                    a.state = this.gamepad.getButtonState(a.button1);
 
-                if (this.actions[k].state == State.Up &&
-                    this.actions[k].button2 != null) {
+                if (a.state == State.Up && a.button2 != null) {
 
-                    this.actions[k].state = this.gamepad
-                        .getButtonState(this.actions[k].button2);
+                    a.state = this.gamepad.getButtonState(a.button2);
                 }
             }
         }
@@ -251,6 +291,29 @@ class InputManager {
     public getStick() : Vector2 {
 
         return this.stick.clone();
+    }
+
+
+    public getAction(name : string) : State {
+
+        for (let e of this.actions) {
+
+            if (e.name == name)
+                return e.state;
+        }
+        return State.Up;
+    }
+
+
+    public getKeyState(key : string) : State {
+
+        for (let e of this.keyStates) {
+
+            if (e.key == key)
+                return e.value;
+        }
+
+        return State.Up;
     }
 
 }
