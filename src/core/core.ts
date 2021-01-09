@@ -37,8 +37,10 @@ class Core {
     private canvas : Canvas;
     private assets : AssetManager;
     private input : InputManager;
-    private activeScene : Scene;
     private ev : GameEvent;
+
+    private activeScene : Scene;
+    private activeSceneType : Function;
 
     private timeSum : number;
     private oldTime : number;
@@ -63,6 +65,9 @@ class Core {
         this.oldTime = 0.0;
 
         this.initialized = false;
+
+        this.activeScene = null;
+        this.activeSceneType = null;
     }
 
 
@@ -106,14 +111,16 @@ class Core {
         while ((refreshCount --) > 0) {
 
             if (!this.initialized && this.assets.hasLoaded()) {
-    
-                this.activeScene.init(null, this.ev);
+                
+                if (this.activeSceneType != null)
+                    this.activeScene = new this.activeSceneType.prototype.constructor(null, this.ev);
+                    
                 this.initialized = true;
             }
 
             this.input.preUpdate();
 
-            if (this.initialized) {
+            if (this.initialized && this.activeScene != null) {
 
                 this.activeScene.refresh(this.ev);
             }
@@ -125,7 +132,8 @@ class Core {
 
         if (this.initialized) {
 
-            this.activeScene.redraw(this.canvas);
+            if (this.activeScene != null)
+                this.activeScene.redraw(this.canvas);
         }
         else {
 
@@ -153,9 +161,9 @@ class Core {
     }
 
 
-    public run(initialScene : Scene) {
+    public run(initialScene : Function) {
 
-        this.activeScene = initialScene;
+        this.activeSceneType = initialScene;
 
         this.loop(0);
     }

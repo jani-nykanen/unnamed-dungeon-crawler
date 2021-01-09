@@ -7,8 +7,9 @@
 
 interface Scene {
 
-    init(param : any, ev : GameEvent) : void;
     refresh(ev : GameEvent) : void;
     redraw(c : Canvas) : void;
+
+    // TODO: Replace any with... something 
     dispose() : any;
 }

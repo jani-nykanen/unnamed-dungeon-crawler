@@ -9,6 +9,11 @@
 // hot code for you.
 // (read: fresh shit is hot, I think?)
 
+// And yes, I added this clusterfuck only to confuse people
+// who start reading my code in this very file
+
+// TODO: Rewrite this, actually...
+
 let addInputActions = (core : Core) : Core => 
         core.addInputAction("fire1", "KeyZ", 0)
             .addInputAction("fire2", "KeyX", 2)
@@ -22,11 +27,12 @@ let configAssets = (core : Core) : Core =>
     [
         {name: "font", path: "assets/bitmaps/font.png"},
         {name: "player", path: "assets/bitmaps/player.png"},
-        {name: "tileset", path: "assets/bitmaps/tileset.png"} 
+        {name: "tileset", path: "assets/bitmaps/tileset.png"} ,
+        {name: "shadow", path: "assets/bitmaps/shadow.png"} 
     ].map(a => core.loadBitmap(a.name, a.path))[0];
 
 
 window.onload = () => {
 
-    compose<Core>(configAssets, addInputActions) (new Core(160, 144, 0)).run(new (Game));
+    compose<Core>(configAssets, addInputActions) (new Core(160, 144, 0)).run(Game);
 }

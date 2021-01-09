@@ -34,8 +34,7 @@ function clamp(x : number, min : number, max : number) : number {
 }
 
 
-/*
-function updateSpeedAxis(speed, target, step) {
+function updateSpeedAxis(speed : number, target : number, step : number) {
 		
     if (speed < target) {
         
@@ -45,10 +44,8 @@ function updateSpeedAxis(speed, target, step) {
 }
 
 
-function overlay(pos, center, hitbox, x, y, w, h) {
-
-    if (center == null)
-        center = new Vector2(0, 0);
+function boxOverlay(pos : Vector2, center : Vector2, hitbox : Vector2, 
+    x : number, y : number, w : number, h : number) {
 
     let px = pos.x + center.x - hitbox.x/2;
     let py = pos.y + center.y - hitbox.y/2;
@@ -56,7 +53,7 @@ function overlay(pos, center, hitbox, x, y, w, h) {
     return px + hitbox.x >= x && px < x+w &&
            py + hitbox.y >= y && py < y+h;
 }
-*/
+
 
 
 function compose<T> (f  : ((a : T) => T), g : ((a : T) => T)) : ((a : T) => T) {

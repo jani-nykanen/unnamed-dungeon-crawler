@@ -8,27 +8,18 @@
 class Game implements Scene {
 
 
-    private testPos : Vector2;
+    private objects : ObjectManager;
 
 
-    constructor() {
+    constructor(param : any, ev : GameEvent) {
 
-        this.testPos = new Vector2();
-    }
-
-    
-    init(param : any, ev : GameEvent) {
-
-        // this.testPos = new Vector2();
+        this.objects = new ObjectManager();
     }
 
 
     refresh(ev : GameEvent) : void {
         
-        const SPEED = 1.0;
-
-        this.testPos.x += ev.getStick().x * SPEED * ev.step;
-        this.testPos.y += ev.getStick().y * SPEED * ev.step;
+        this.objects.update(ev);
     }
 
 
@@ -36,10 +27,7 @@ class Game implements Scene {
 
         c.clear(170, 170, 170);
 
-        c.moveTo(c.width / 2, c.height / 2);
-        c.setFillColor(255, 0, 0);
-        c.fillRect(this.testPos.x-8, this.testPos.y-8, 16, 16);
-        c.moveTo();
+        this.objects.draw(c);
 
         c.drawText(c.getBitmap("font"), "Hello world!",
             2, 2, -1, 0);

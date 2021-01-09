@@ -58,6 +58,15 @@ class Vector2 {
 	}
 
 
+	public scalarMultiply(s : number) : Vector2 {
+
+		this.x *= s;
+		this.y *= s;
+
+		return this.clone();
+	}
+
+
 	static dot(u : Vector2, v : Vector2) {
 
 		return u.x*v.x + u.y*v.y;

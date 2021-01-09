@@ -124,12 +124,18 @@ class Canvas {
     }
 
 
-   public setFillColor(r : number, g = r, b = g, a = 1.0) {
+    public setFillColor(r : number, g = r, b = g, a = 1.0) {
 
         let colorStr = this.getColorString(r, g, b, a);
 
         this.ctx.fillStyle = colorStr;
         // this.ctx.strokeStyle = colorStr;
+    }
+
+
+    public setGlobalAlpha(a = 1.0) {
+
+        this.ctx.globalAlpha = clamp(a, 0, 1);
     }
 
 
@@ -249,8 +255,24 @@ class Canvas {
     }
 
 
+    public drawSpriteFrame(spr : Sprite, bmp : HTMLImageElement, 
+        column : number, row : number,
+        dx : number, dy : number, flip = Flip.None) {
+
+        spr.drawFrame(this, bmp, column, row, dx, dy, flip);
+    }
+
+
+    public drawSprite(spr : Sprite, bmp : HTMLImageElement, 
+        dx : number, dy : number, flip = Flip.None) {
+
+        spr.draw(this, bmp, dx, dy, flip);
+    }
+
+
     public getBitmap(name : string) : HTMLImageElement {
 
         return this.assets.getBitmap(name);
     }
+
 }
