@@ -9,7 +9,7 @@ class GameEvent {
 
 
     public readonly step : number;
-    public readonly input : InputManager;
+    private readonly input : InputManager;
 
 
     constructor(step : number, input : InputManager) {
@@ -17,12 +17,25 @@ class GameEvent {
         this.step = step;
         this.input = input;
     }
+
+
+    public getStick() : Vector2 {
+
+        return this.input.getStick();
+    }
+
+
+    public getAction(name : string) : State {
+
+        return this.input.getAction(name);
+    }
 }
 
 
 class Core {
 
     private canvas : Canvas;
+    private assets : AssetManager;
     private input : InputManager;
     private activeScene : Scene;
     private ev : GameEvent;
@@ -35,7 +48,8 @@ class Core {
 
     constructor(canvasWidth : number, canvasHeight : number, frameSkip : number) {
 
-        this.canvas = new Canvas(canvasWidth, canvasHeight);
+        this.assets = new AssetManager();
+        this.canvas = new Canvas(canvasWidth, canvasHeight, this.assets);
 
         this.input = new InputManager();
         this.input.addAction("left", "ArrowLeft", 14)
@@ -52,7 +66,34 @@ class Core {
     }
 
 
-    public loop(ts : number) {
+    private drawLoadingScreen(c : Canvas) {
+
+        let barWidth = c.width / 4;
+        let barHeight = barWidth / 8;
+
+        c.clear(0, 0, 0);
+    
+        let t = this.assets.dataLoadedUnit();
+        let x = c.width/2 - barWidth/2;
+        let y = c.height/2 - barHeight/2;
+
+        x |= 0;
+        y |= 0;
+    
+        // Outlines
+        c.setFillColor(255);
+        c.fillRect(x-2, y-2, barWidth+4, barHeight+4);
+        c.setFillColor(0);
+        c.fillRect(x-1, y-1, barWidth+2, barHeight+2);
+    
+        // Bar
+        let w = (barWidth*t) | 0;
+        c.setFillColor(255);
+        c.fillRect(x, y, w, barHeight);
+    }
+
+
+    private loop(ts : number) {
 
         const MAX_REFRESH_COUNT = 5;
         const FRAME_WAIT = 16.66667 * this.ev.step;
@@ -64,7 +105,7 @@ class Core {
         let refreshCount = (this.timeSum / FRAME_WAIT) | 0;
         while ((refreshCount --) > 0) {
 
-            if (!this.initialized) { // && this.assets.loaded()
+            if (!this.initialized && this.assets.hasLoaded()) {
     
                 this.activeScene.init(null, this.ev);
                 this.initialized = true;
@@ -72,14 +113,24 @@ class Core {
 
             this.input.preUpdate();
 
-            this.activeScene.refresh(this.ev);
+            if (this.initialized) {
+
+                this.activeScene.refresh(this.ev);
+            }
 
             this.input.postUpdate();
 
             this.timeSum -= FRAME_WAIT;
         }
 
-        this.activeScene.redraw(this.canvas);
+        if (this.initialized) {
+
+            this.activeScene.redraw(this.canvas);
+        }
+        else {
+
+            this.drawLoadingScreen(this.canvas);
+        }
 
         window.requestAnimationFrame(ts => this.loop(ts));
     }
@@ -89,6 +140,14 @@ class Core {
         button1 : number, button2 = -1) : Core {
 
         this.input.addAction(name, key, button1, button2);
+
+        return this;
+    }
+
+
+    public loadBitmap(name : string, url : string) : Core {
+
+        this.assets.loadBitmap(name, url);
 
         return this;
     }

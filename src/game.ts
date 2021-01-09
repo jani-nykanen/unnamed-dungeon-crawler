@@ -19,16 +19,16 @@ class Game implements Scene {
     
     init(param : any, ev : GameEvent) {
 
-        this.testPos = new Vector2();
+        // this.testPos = new Vector2();
     }
 
 
     refresh(ev : GameEvent) : void {
         
         const SPEED = 1.0;
-        
-        this.testPos.x += ev.input.getStick().x * SPEED * ev.step;
-        this.testPos.y += ev.input.getStick().y * SPEED * ev.step;
+
+        this.testPos.x += ev.getStick().x * SPEED * ev.step;
+        this.testPos.y += ev.getStick().y * SPEED * ev.step;
     }
 
 
@@ -41,6 +41,8 @@ class Game implements Scene {
         c.fillRect(this.testPos.x-8, this.testPos.y-8, 16, 16);
         c.moveTo();
 
+        c.drawText(c.getBitmap("font"), "Hello world!",
+            2, 2, -1, 0);
     }
 
 

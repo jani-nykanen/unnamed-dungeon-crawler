@@ -57,3 +57,9 @@ function overlay(pos, center, hitbox, x, y, w, h) {
            py + hitbox.y >= y && py < y+h;
 }
 */
+
+
+function compose<T> (f  : ((a : T) => T), g : ((a : T) => T)) : ((a : T) => T) {
+
+    return (a : T) => f(g(a));
+}
