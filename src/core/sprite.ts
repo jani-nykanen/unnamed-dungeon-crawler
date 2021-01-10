@@ -111,5 +111,5 @@ class Sprite {
 
     public getRow = () => this.row;
     public getColumn = () => this.column;
-
+    public getTimer = () => this.timer;
 }

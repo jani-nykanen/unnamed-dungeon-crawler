@@ -12,9 +12,16 @@ class Player extends CollisionObject {
     private rolling : boolean;
     private rollTimer : number;
     private faceDirection : Vector2;
+    private faceColumn : number;
 
     private sprSword : Sprite;
     private attacking : boolean;
+
+    private spinAttackTimer : number;
+    private readyingSpinAttack : boolean;
+    private spinning : boolean;
+    private spinStartFrame : number;
+    private spinStartFrameReached : boolean;
 
 
     constructor(x : number, y : number) {
@@ -30,9 +37,15 @@ class Player extends CollisionObject {
         this.rolling = false;
         this.rollTimer = 0.0;let dir = new Vector2();
         this.faceDirection = new Vector2(0, 1);
+        this.faceColumn = 0;
 
         this.attacking = false;
         this.flip = Flip.None;
+
+        this.readyingSpinAttack = false;
+        this.spinAttackTimer = 0.0;
+        this.spinning = false;
+        this.spinStartFrameReached = false;
     }
 
 
@@ -77,15 +90,36 @@ class Player extends CollisionObject {
     }
 
 
+    private handleSpinAttack(ev : GameEvent) {
+
+        if ((ev.getAction("fire2") & State.DownOrPressed) == 0) {
+
+            this.readyingSpinAttack = false;
+            this.spinning = true;
+            this.spinStartFrame = this.faceColumn;
+            this.spinStartFrameReached = false;
+
+            this.spr.setFrame(this.spinStartFrame, 9);
+
+            this.stopMovement();
+
+            return true;
+        }
+        return false;
+    }
+
+
     private control(ev : GameEvent) {
 
         const BASE_SPEED = 1.0;
         const EPS = 0.01;
 
-        if (this.rolling || this.attacking) return;
+        if (this.rolling || this.attacking || this.spinning) 
+            return;
 
         if (this.startRolling(ev) ||
-            this.swordAttack(ev))
+            this.swordAttack(ev) ||
+            (this.readyingSpinAttack && this.handleSpinAttack(ev)))
             return;
 
         this.target = ev.getStick().scalarMultiply(BASE_SPEED);
@@ -102,20 +136,68 @@ class Player extends CollisionObject {
         const BASE_RUN_SPEED = 12;
         const RUN_SPEED_MOD = 4;
         const ATTACK_SPEED = 6;
+        const ATTACK_FINAL_FRAME = 20;
         const ROLL_SPEED = 4;
+        const SPIN_ATTACK_SPEED = 4;
 
         // TODO: Fix the "bug" where the character won't get
         // animated but moves if the player keeps tapping
         // keys
 
+        // TODO 2: Put different animations to own methods
+        // for cleaner code
+
         let animSpeed = 0;
+        let oldFrame = this.spr.getColumn();
+        let row = -1;
+
+        if (this.spinning) {
+
+            this.flip = Flip.None;
+
+            this.spr.animate(this.spr.getRow(), 0, 3, SPIN_ATTACK_SPEED, ev.step);
+            if (!this.spinStartFrameReached &&
+                oldFrame != this.spinStartFrame &&
+                this.spr.getColumn() == this.spinStartFrame) {
+
+                this.spinStartFrameReached = true;
+            }
+
+            if (this.spinStartFrameReached &&
+                oldFrame == this.spinStartFrame &&
+                this.spr.getColumn() != oldFrame) {
+
+                this.spinning = false;
+
+                if (this.spinStartFrame != 3) {
+
+                    row = this.spinStartFrame % 3;
+                }
+                else {
+
+                    row = 1;
+                }
+                this.flip = this.spinStartFrame == 1 ? Flip.Horizontal : Flip.None;
+            }
+            else {
+
+                this.sprSword.setFrame(this.spr.getColumn() + 4, this.spr.getRow());
+                return;
+            }
+        }
 
         if (this.attacking) {
 
-            this.spr.animate(this.spr.getRow(), 0, 3, ATTACK_SPEED, ev.step);
-            if (this.spr.getColumn() == 3) {
+            this.spr.animate(this.spr.getRow(), 0, 3, 
+                this.spr.getColumn() == 2 ? ATTACK_FINAL_FRAME : ATTACK_SPEED, 
+                ev.step);
+            if (this.spr.getColumn() == 3 || 
+                (this.spr.getColumn() == 2 && 
+                this.spr.getTimer() >= ATTACK_SPEED &&
+                (ev.getAction("fire2") & State.DownOrPressed) == 0)) {
 
                 this.attacking = false;
+                this.readyingSpinAttack = this.spr.getColumn() == 3;
             }
             else {
 
@@ -130,7 +212,8 @@ class Player extends CollisionObject {
             return;
         }
 
-        let row = this.spr.getRow() % 3;
+        if (row < 0)
+            row = this.spr.getRow() % 3;
 
         // Determine direction (read: row)
         if (this.target.length() > EPS) {
@@ -139,11 +222,15 @@ class Player extends CollisionObject {
 
                 row = this.target.y > 0 ? 0 : 2;
                 this.flip = Flip.None;
+
+                this.faceColumn = row;
             }
             else {
 
                 row = 1;
                 this.flip = this.target.x > 0 ? Flip.None : Flip.Horizontal;
+
+                this.faceColumn = this.target.x > 0 ? 3 : 1;
             }
 
             animSpeed = BASE_RUN_SPEED - RUN_SPEED_MOD * this.speed.length();
@@ -160,6 +247,7 @@ class Player extends CollisionObject {
     private updateTimers(ev : GameEvent) {
 
         const MINIMUM_ROLL_TIME = 10;
+        const MAX_SPIN_ATTACK_TIME = 8;
 
         // Rolling
         if (this.rollTimer > 0.0) {
@@ -175,6 +263,12 @@ class Player extends CollisionObject {
                 this.rollTimer = 0;
                 this.rolling = false;
             }
+        }
+
+        // Spin attack, readying
+        if (this.readyingSpinAttack) {
+
+            this.spinAttackTimer = (this.spinAttackTimer + ev.step) % MAX_SPIN_ATTACK_TIME;
         }
     }
 
@@ -232,6 +326,20 @@ class Player extends CollisionObject {
     }
 
 
+    private drawSwordSpinAttack(c : Canvas) {
+
+        const POS_X = [-15, -16, 0, -1];
+        const POS_Y = [-6, -20, -20, -6];
+
+        let px = Math.round(this.pos.x);
+        let py = Math.round(this.pos.y);
+
+        c.drawSprite(this.sprSword, c.getBitmap("player"),
+            px + POS_X[this.spr.getColumn()], 
+            py +  POS_Y[this.spr.getColumn()]);
+    }
+
+
     public draw(c : Canvas) {
 
         let shadow = c.getBitmap("shadow");
@@ -254,14 +362,29 @@ class Player extends CollisionObject {
 
             this.drawSword(c);
         }
+        else if (this.spinning && this.spr.getColumn() % 3 != 0) {
 
-        c.drawSprite(this.spr, c.getBitmap("player"),
+            this.drawSwordSpinAttack(c);
+        }
+
+        // Base sprite
+        let column = this.spr.getColumn();
+        if (this.readyingSpinAttack && Math.floor(this.spinAttackTimer / 4) % 2 == 0) {
+
+            column += 6;
+        }
+        c.drawSpriteFrame(this.spr, c.getBitmap("player"),
+            column, this.spr.getRow(),
             px - xoff, py - yoff, this.flip);
 
         // Sword, front
         if (this.attacking && this.spr.getRow() % 3 == 0) {
 
             this.drawSword(c);
+        }
+        else if (this.spinning && this.spr.getColumn() % 3 == 0) {
+
+            this.drawSwordSpinAttack(c);
         }
     }
 }
