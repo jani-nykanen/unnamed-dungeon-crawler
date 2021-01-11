@@ -4,8 +4,11 @@
  * (c) 2021 Jani Nykänen
  */
 
+// It has "a_" to make sure TypeScript parses shit in
+// the correct order
 
-// Needed for object generators
+
+// Needed for object generators (or not)
 abstract class ExistingObject {
 
     protected exist : boolean;
@@ -31,7 +34,10 @@ abstract class GameObject extends ExistingObject {
     protected friction : Vector2;
     protected center : Vector2;
 
+    protected hitbox : Vector2;
+
     protected dying : boolean;
+    protected inCamera : boolean;
 
     protected spr : Sprite;
 
@@ -47,15 +53,19 @@ abstract class GameObject extends ExistingObject {
         this.friction = new Vector2(1, 1);
         this.center = new Vector2();
 
+        this.hitbox = new Vector2();
+
         this.spr = new Sprite(0, 0);
 
         this.dying = false;
+        this.inCamera = true; // TODO: Make it false, once possible
     }
 
 
     protected die = (ev : GameEvent) => true;
     protected updateLogic(ev : GameEvent) {}
     protected postUpdate(ev : GameEvent) {}
+    protected outsideCameraEvent() {}
 
 
     private updateMovement(ev : GameEvent) {
@@ -72,15 +82,7 @@ abstract class GameObject extends ExistingObject {
 
     public update(ev : GameEvent) {
 
-        if (!this.exist) return;
-
-        /*
-        if (!this.inCamera) {
-
-            this.outsideCameraEvent(ev);
-            return;
-        }
-        */
+        if (!this.exist || !this.inCamera) return;
 
         if (this.dying) {
 
@@ -107,22 +109,57 @@ abstract class GameObject extends ExistingObject {
     }
 
 
+    public cameraCheck(cam : Camera) {
+
+        let topLeft = cam.getPos();
+
+        let oldState = this.inCamera;
+        this.inCamera = boxOverlay(this.pos, this.center, this.hitbox,
+            topLeft.x, topLeft.y, cam.width, cam.height);
+
+        if (oldState && !this.inCamera) {
+
+            this.outsideCameraEvent();
+        }
+    }
+
+
     public draw(c : Canvas) {}
 
 
-    public getPos = () => this.pos;
+    public getPos = () => this.pos.clone();
+    public isInCamera = () => this.inCamera;
+
+    // Faster than cloning the pos
+    public getCoordX = () => this.pos.x;
+    public getCoordY = () => this.pos.y;
 }
 
 
-abstract class CollisionObject extends GameObject {
+
+abstract class SpawnableObject extends GameObject {
+
+    abstract spawn(x : number, y : number, 
+        speedx : number, speedy : number) : void;
+}
+
+
+
+abstract class CollisionObject extends SpawnableObject {
+
+
+    protected radius : number;
 
 
     constructor(x : number, y : number) {
 
         super(x, y);
+
+        this.radius = 0.0;
     }
 
     //
     // TODO: Collisions
     //
 }
+

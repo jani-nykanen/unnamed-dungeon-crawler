@@ -16,6 +16,7 @@ class Player extends CollisionObject {
 
     private sprSword : Sprite;
     private attacking : boolean;
+    private usingMagic : boolean;
 
     private spinAttackTimer : number;
     private readyingSpinAttack : boolean;
@@ -23,8 +24,10 @@ class Player extends CollisionObject {
     private spinStartFrame : number;
     private spinStartFrameReached : boolean;
 
+    private readonly magic : ObjectGenerator<Magic>;
 
-    constructor(x : number, y : number) {
+
+    constructor(x : number, y : number, magic : ObjectGenerator<Magic>) {
 
         super(x, y);
 
@@ -40,17 +43,21 @@ class Player extends CollisionObject {
         this.faceColumn = 0;
 
         this.attacking = false;
+        this.usingMagic = false;
+
         this.flip = Flip.None;
 
         this.readyingSpinAttack = false;
         this.spinAttackTimer = 0.0;
         this.spinning = false;
         this.spinStartFrameReached = false;
+
+        this.magic = magic;
     }
 
 
     // Star trolling?
-    private startRolling(ev : GameEvent) {
+    private startRolling(ev : GameEvent) : boolean {
 
         const ROLL_SPEED = 1.5;
         const ROLL_TIME = 30;
@@ -72,7 +79,7 @@ class Player extends CollisionObject {
     }
 
 
-    private swordAttack(ev : GameEvent) {
+    private swordAttack(ev : GameEvent) : boolean {
         
         if (ev.getAction("fire2") == State.Pressed) {
 
@@ -90,7 +97,38 @@ class Player extends CollisionObject {
     }
 
 
-    private handleSpinAttack(ev : GameEvent) {
+    private useMagic(ev : GameEvent) : boolean {
+
+        const MAGIC_SPEED = 2.0;
+
+        const DIR_X = [0, -1, 0, 1];
+        const DIR_Y = [1, 0, -1, 0];
+
+        const XOFF = [0, -6, 0, 6];
+        const YOFF = [0, -4, -8, -4];
+
+        if (!this.readyingSpinAttack &&
+            ev.getAction("fire3") == State.Pressed) {
+
+            this.stopMovement();
+
+            this.spr.setFrame(2, this.spr.getRow() + 6);
+
+            this.usingMagic = true;
+
+            this.magic.spawn(
+                this.pos.x + XOFF[this.faceColumn], 
+                this.pos.y + YOFF[this.faceColumn],
+                DIR_X[this.faceColumn] * MAGIC_SPEED, 
+                DIR_Y[this.faceColumn] * MAGIC_SPEED);
+
+            return true;
+        }
+        return false;
+    }
+
+
+    private handleSpinAttack(ev : GameEvent) : boolean {
 
         if ((ev.getAction("fire2") & State.DownOrPressed) == 0) {
 
@@ -114,11 +152,13 @@ class Player extends CollisionObject {
         const BASE_SPEED = 1.0;
         const EPS = 0.01;
 
-        if (this.rolling || this.attacking || this.spinning) 
+        if (this.rolling  || this.attacking || 
+            this.spinning || this.usingMagic) 
             return;
 
         if (this.startRolling(ev) ||
             this.swordAttack(ev) ||
+            this.useMagic(ev) ||
             (this.readyingSpinAttack && this.handleSpinAttack(ev)))
             return;
 
@@ -139,6 +179,7 @@ class Player extends CollisionObject {
         const ATTACK_FINAL_FRAME = 20;
         const ROLL_SPEED = 4;
         const SPIN_ATTACK_SPEED = 4;
+        const MAGIC_TIME = 20;
 
         // TODO: Fix the "bug" where the character won't get
         // animated but moves if the player keeps tapping
@@ -150,6 +191,19 @@ class Player extends CollisionObject {
         let animSpeed = 0;
         let oldFrame = this.spr.getColumn();
         let row = -1;
+
+        if (this.usingMagic) {
+
+            this.spr.animate(this.spr.getRow(), 2, 3, MAGIC_TIME, ev.step);
+            if (this.spr.getColumn() == 3) {
+
+                this.usingMagic = false;
+            }
+            else {
+
+                return;
+            }
+        }
 
         if (this.spinning) {
 
@@ -387,4 +441,8 @@ class Player extends CollisionObject {
             this.drawSwordSpinAttack(c);
         }
     }
+
+
+    // Unused, need to rethink the logic here
+    public spawn(x : number, y : number, speedx : number, speedy : number) {}
 }
