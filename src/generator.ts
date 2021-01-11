@@ -70,6 +70,15 @@ class ObjectGenerator<T extends CollisionObject> {
     }
 
 
+    public postDraw(c : Canvas) {
+
+        for (let o of this.objects) {
+
+            o.postDraw(c);
+        }
+    }
+
+
     public pushObjectsToArray(arr : Array<GameObject>) {
 
         for (let o of this.objects) {

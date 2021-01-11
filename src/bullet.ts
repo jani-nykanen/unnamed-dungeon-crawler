@@ -32,6 +32,16 @@ class Bullet extends CollisionObject {
     }
 
 
+    protected die(ev : GameEvent) : boolean {
+
+        const DEATH_SPEED = 4;
+
+        this.spr.animate(this.id, 4, 8, DEATH_SPEED, ev.step);
+
+        return this.spr.getColumn() == 8;
+    }
+
+
     protected updateLogic(ev : GameEvent) {
 
         const ANIM_SPEED = 4;
@@ -61,9 +71,7 @@ class Bullet extends CollisionObject {
     }
 
 
-    public draw(c : Canvas) {
-
-        if (!this.inCamera || !this.exist) return;
+    private baseDraw(c : Canvas) {
 
         let px = Math.round(this.pos.x);
         let py = Math.round(this.pos.y);
@@ -71,6 +79,22 @@ class Bullet extends CollisionObject {
         c.setFillColor(255, 0, 0);
         c.drawSprite(this.spr, c.getBitmap("bullet"), 
             px - this.spr.width/2, py - this.spr.height/2);
+    }
+
+
+    public draw(c : Canvas) {
+
+        if (!this.inCamera || !this.exist || this.dying) return;
+
+        this.baseDraw(c);
+    }
+
+
+    public postDraw(c : Canvas) {
+
+        if (!this.inCamera || !this.exist || !this.dying) return;
+
+        this.baseDraw(c);
     }
 
 

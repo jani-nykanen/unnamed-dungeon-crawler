@@ -80,12 +80,13 @@ class Sprite {
     }
 
 
-    public setFrame(column : number, row : number) {
+    public setFrame(column : number, row : number, preserveTimer = false) {
 
         this.column = column;
         this.row = row;
         
-        this.timer = 0;
+        if (!preserveTimer)
+            this.timer = 0;
     }
 
 

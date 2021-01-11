@@ -23,10 +23,17 @@ class ObjectManager {
     }
 
 
+    public cameraMovement(cam : Camera, ev : GameEvent) {
+
+        this.player.cameraMovement(cam, ev);
+    }
+
+
     public update(cam : Camera, stage : Stage, ev : GameEvent) {
 
         this.player.update(ev);
-        stage.objectCollisions(this.player, cam, ev);
+        this.player.cameraEvent(cam);
+        // stage.objectCollisions(this.player, cam, ev);
 
         this.bullets.update(cam, ev);
         this.bullets.stageCollisions(stage, cam, ev);
@@ -47,6 +54,9 @@ class ObjectManager {
 
             o.draw(c);
         }
+
+        // "Post"-draw objects
+        this.bullets.postDraw(c);
 
         // Clear the render buffer array
         // TODO: Check if there is a better, faster and/or more

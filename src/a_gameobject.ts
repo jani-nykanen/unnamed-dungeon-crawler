@@ -62,7 +62,12 @@ abstract class GameObject extends ExistingObject {
     }
 
 
-    protected die = (ev : GameEvent) => true;
+    protected die (ev : GameEvent) : boolean {
+
+        return true;
+    }
+
+
     protected updateLogic(ev : GameEvent) {}
     protected postUpdate(ev : GameEvent) {}
     protected outsideCameraEvent() {}
@@ -111,7 +116,7 @@ abstract class GameObject extends ExistingObject {
 
     public cameraCheck(cam : Camera) {
 
-        let topLeft = cam.getPos();
+        let topLeft = cam.getWorldPos();
 
         let oldState = this.inCamera;
         this.inCamera = boxOverlay(this.pos, this.center, this.hitbox,
@@ -125,6 +130,7 @@ abstract class GameObject extends ExistingObject {
 
 
     public draw(c : Canvas) {}
+    public postDraw(c : Canvas) {}
 
 
     public getPos = () => this.pos.clone();
@@ -140,8 +146,8 @@ abstract class GameObject extends ExistingObject {
 
 abstract class SpawnableObject extends GameObject {
 
-    abstract spawn(id : number, x : number, y : number, 
-        speedx : number, speedy : number) : void;
+    public spawn(id : number, x : number, y : number, 
+        speedx : number, speedy : number) {}
 }
 
 

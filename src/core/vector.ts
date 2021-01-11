@@ -35,7 +35,7 @@ class Vector2 {
 			this.x = forceUnit ? 1 : 0;
             this.y = 0;
 
-			return;
+			return this.clone();;
 		}
 		
 		this.x /= l;

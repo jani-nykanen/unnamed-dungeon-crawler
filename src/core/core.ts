@@ -10,12 +10,14 @@ class GameEvent {
 
     public readonly step : number;
     private readonly input : InputManager;
+    private readonly assets : AssetManager;
 
 
-    constructor(step : number, input : InputManager) {
+    constructor(step : number, input : InputManager, assets : AssetManager) {
 
         this.step = step;
         this.input = input;
+        this.assets = assets;
     }
 
 
@@ -28,6 +30,12 @@ class GameEvent {
     public getAction(name : string) : State {
 
         return this.input.getAction(name);
+    }
+
+
+    public getTilemap(name : string) : Tilemap {
+
+        return this.assets.getTilemap(name);
     }
 }
 
@@ -59,7 +67,7 @@ class Core {
             .addAction("right", "ArrowRight", 15)
             .addAction("down", "ArrowDown", 13),
 
-        this.ev = new GameEvent(frameSkip+1, this.input);
+        this.ev = new GameEvent(frameSkip+1, this.input, this.assets);
 
         this.timeSum = 0.0;
         this.oldTime = 0.0;
@@ -156,6 +164,14 @@ class Core {
     public loadBitmap(name : string, url : string) : Core {
 
         this.assets.loadBitmap(name, url);
+
+        return this;
+    }
+
+
+    public loadTilemap(name : string, url : string) : Core {
+
+        this.assets.loadTilemap(name, url);
 
         return this;
     }

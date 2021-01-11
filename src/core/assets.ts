@@ -41,6 +41,7 @@ class AssetManager {
 
 
     private bitmaps : AssetContainer<HTMLImageElement>;
+    private tilemaps : AssetContainer<Tilemap>;
     private loaded : number;
     private total : number;
 
@@ -48,9 +49,35 @@ class AssetManager {
     constructor() {
 
         this.bitmaps = new AssetContainer<HTMLImageElement> ();
+        this.tilemaps = new AssetContainer<Tilemap> ();
 
         this.total = 0;
         this.loaded = 0;
+    }
+
+
+    private loadTextfile(path : string, type : string, cb : (s : string) => void) {
+        
+        let xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("text/" + type);
+        xobj.open("GET", path, true);
+
+        ++ this.total;
+
+        xobj.onreadystatechange = () => {
+
+            if (xobj.readyState == 4 ) {
+
+                if(String(xobj.status) == "200") {
+                    
+                    if (cb != undefined)
+                        cb(xobj.responseText);
+                }
+                ++ this.loaded;
+            }
+                
+        };
+        xobj.send(null);  
     }
 
 
@@ -68,6 +95,18 @@ class AssetManager {
     }
 
 
+    public loadTilemap(name : string, url : string) {
+
+        ++ this.total;
+        
+        this.loadTextfile(url, "xml", (str : string) => {
+
+            this.tilemaps.addAsset(name, new Tilemap(str));
+            ++ this.loaded;
+        });
+    }
+
+
     public hasLoaded() : boolean {
 
         return this.loaded >= this.total;
@@ -77,6 +116,12 @@ class AssetManager {
     public getBitmap(name : string) : HTMLImageElement {
 
         return this.bitmaps.getAsset(name);
+    }
+
+
+    public getTilemap(name : string) : Tilemap {
+
+        return this.tilemaps.getAsset(name);
     }
 
 

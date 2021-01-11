@@ -186,25 +186,27 @@ class InputManager {
 
             this.stick = padStick;
         }
+        else {
         
-        if (this.getAction("right") & State.DownOrPressed) {
+            if (this.getAction("right") & State.DownOrPressed) {
 
-            this.stick.x = 1;
+                this.stick.x = 1;
+            }
+            else if (this.getAction("left") & State.DownOrPressed) {
+
+                this.stick.x = -1;
+            }
+
+            if (this.getAction("down") & State.DownOrPressed) {
+
+                this.stick.y = 1;
+            }
+            else if (this.getAction("up") & State.DownOrPressed) {
+
+                this.stick.y = -1;
+            }
+            this.stick.normalize();
         }
-        else if (this.getAction("left") & State.DownOrPressed) {
-
-            this.stick.x = -1;
-        }
-
-        if (this.getAction("down") & State.DownOrPressed) {
-
-            this.stick.y = 1;
-        }
-        else if (this.getAction("up") & State.DownOrPressed) {
-
-            this.stick.y = -1;
-        }
-        this.stick.normalize();
 
         this.stickDelta = new Vector2(
             this.stick.x - this.oldStick.x,

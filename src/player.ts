@@ -294,7 +294,7 @@ class Player extends CollisionObject {
         }
         else {
 
-            this.spr.setFrame(0, row);
+            this.spr.setFrame(0, row, true);
         }
         
     }
@@ -332,8 +332,8 @@ class Player extends CollisionObject {
     protected updateLogic(ev : GameEvent) {
 
         this.control(ev);
-        this.animate(ev);
         this.updateTimers(ev);
+        this.animate(ev);
     }
 
 
@@ -445,6 +445,53 @@ class Player extends CollisionObject {
     }
 
 
-    // Unused, need to rethink the logic here
-    public spawn(x : number, y : number, speedx : number, speedy : number) {}
+    public cameraEvent(cam : Camera) {
+
+        const CAM_SPEED = 1.0 / 20.0;
+
+        let topLeft = cam.getWorldPos();
+
+        let mx = 0;
+        let my = 0;
+        let move = false;
+
+        if (this.pos.y + this.radius >= topLeft.y + cam.height) {
+
+            my = 1;
+            move = true;
+        }
+        else if (this.pos.y - this.radius <= topLeft.y) {
+
+            my = -1;
+            move = true;
+        }
+        else if (this.pos.x + this.radius >= topLeft.x + cam.width) {
+
+            mx = 1;
+            move = true;
+        }
+        else if (this.pos.x - this.radius <= topLeft.x) {
+
+            mx = -1;
+            move = true;
+        }
+
+        if (move) {
+
+            cam.move(mx, my, CAM_SPEED);
+        }
+    }
+
+
+    public cameraMovement(cam : Camera, ev : GameEvent) {
+
+        let speed = cam.getSpeed() * this.radius * 2;
+        let dir = cam.getDirection();
+
+        let moveMod = Math.abs(dir.y) > Math.abs(dir.x) ? cam.width/cam.height : 1;
+        speed *= moveMod;
+
+        this.pos.x += dir.x * speed * ev.step;
+        this.pos.y += dir.y * speed * ev.step; 
+    }
 }

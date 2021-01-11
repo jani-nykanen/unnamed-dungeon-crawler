@@ -5,37 +5,42 @@
  */
 
 
-// They say functional programming is hot, so here's some
-// hot code for you.
-// (read: fresh shit is hot, I think?)
 
-// And yes, I added this clusterfuck only to confuse people
-// who start reading my code in this very file
+let setActions = (core : Core) => {
 
-// TODO: Rewrite this, actually...
-
-let addInputActions = (core : Core) : Core => 
-        core.addInputAction("fire1", "KeyZ", 0)
-            .addInputAction("fire2", "KeyX", 2)
-            .addInputAction("fire3", "KeyC", 1)
-            .addInputAction("start", "Enter", 9, 7)
-            .addInputAction("back", "Escape", 8, 6)
-            .addInputAction("select", "ShiftLeft", 4, 5);
+    core.addInputAction("fire2", "KeyZ", 2)
+        .addInputAction("fire3", "KeyX", 1)
+        .addInputAction("fire1", "KeyC", 0)
+        .addInputAction("start", "Enter", 9, 7)
+        .addInputAction("back", "Escape", 8, 6)
+        .addInputAction("select", "ShiftLeft", 4, 5);
+}
 
 
-let configAssets = (core : Core) : Core => 
-    // TODO: Parse these from an Xml file, like in my previous
-    // projects...
+let loadAssets = (core : Core) => {
+
+    // Bitmaps
     [
         {name: "font", path: "assets/bitmaps/font.png"},
         {name: "player", path: "assets/bitmaps/player.png"},
         {name: "tileset", path: "assets/bitmaps/tileset.png"},
         {name: "shadow", path: "assets/bitmaps/shadow.png"},
         {name: "bullet", path: "assets/bitmaps/bullets.png"} 
-    ].map(a => core.loadBitmap(a.name, a.path))[0];
+    ].map(a => core.loadBitmap(a.name, a.path));
+
+    // Tilemaps
+    [
+        {name: "baseRoom", path: "assets/maps/base_room.tmx"},
+    ].map(a => core.loadTilemap(a.name, a.path));
+}
 
 
 window.onload = () => {
 
-    compose<Core>(configAssets, addInputActions) (new Core(160, 144, 0)).run(Game);
+    let core = new Core(160, 144, 0);
+
+    setActions(core);
+    loadAssets(core);
+
+    core.run(Game);
 }

@@ -24,6 +24,12 @@ class Game implements Scene {
     refresh(ev : GameEvent) : void {
         
         this.cam.update(ev);
+        if (this.cam.isMoving()) {
+
+            this.objects.cameraMovement(this.cam, ev);
+            return;
+        }
+
         this.stage.update(ev);
         this.objects.update(this.cam, this.stage, ev);
     }
@@ -38,8 +44,11 @@ class Game implements Scene {
         this.objects.draw(c);
 
         c.moveTo();
+
+        c.setFillColor(255, 170, 0);
+        c.fillRect(0, 128, 160, 16);
         c.drawText(c.getBitmap("font"), "Hello world!",
-            2, 2, -1, 0);
+            2, 130, -1, 0);
     }
 
 
