@@ -24,11 +24,14 @@ let addInputActions = (core : Core) : Core =>
 
 
 let configAssets = (core : Core) : Core => 
+    // TODO: Parse these from an Xml file, like in my previous
+    // projects...
     [
         {name: "font", path: "assets/bitmaps/font.png"},
         {name: "player", path: "assets/bitmaps/player.png"},
-        {name: "tileset", path: "assets/bitmaps/tileset.png"} ,
-        {name: "shadow", path: "assets/bitmaps/shadow.png"} 
+        {name: "tileset", path: "assets/bitmaps/tileset.png"},
+        {name: "shadow", path: "assets/bitmaps/shadow.png"},
+        {name: "bullet", path: "assets/bitmaps/bullets.png"} 
     ].map(a => core.loadBitmap(a.name, a.path))[0];
 
 

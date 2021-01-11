@@ -6,7 +6,7 @@
 
 
 
-class ObjectGenerator<T extends SpawnableObject> {
+class ObjectGenerator<T extends CollisionObject> {
 
 
     private objects : Array<T>;
@@ -20,7 +20,8 @@ class ObjectGenerator<T extends SpawnableObject> {
     }
 
 
-    public spawn(x : number, y : number, sx : number, sy : number) {
+    public spawn(id : number,
+        x : number, y : number, sx : number, sy : number) {
 
         let o = null;
         for (let e of this.objects) {
@@ -37,7 +38,7 @@ class ObjectGenerator<T extends SpawnableObject> {
             o = this.objects[this.objects.length-1];
         }
 
-        o.spawn(x, y, sx, sy);
+        o.spawn(id, x, y, sx, sy);
     }
 
 
@@ -47,6 +48,15 @@ class ObjectGenerator<T extends SpawnableObject> {
 
             o.cameraCheck(cam);
             o.update(ev);
+        }
+    }
+
+
+    public stageCollisions(stage : Stage, cam : Camera, ev : GameEvent) {
+
+        for (let o of this.objects) {
+
+            stage.objectCollisions(o, cam, ev);
         }
     }
 

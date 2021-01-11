@@ -129,6 +129,7 @@ abstract class GameObject extends ExistingObject {
 
     public getPos = () => this.pos.clone();
     public isInCamera = () => this.inCamera;
+    public isDying = () => this.dying;
 
     // Faster than cloning the pos
     public getCoordX = () => this.pos.x;
@@ -139,7 +140,7 @@ abstract class GameObject extends ExistingObject {
 
 abstract class SpawnableObject extends GameObject {
 
-    abstract spawn(x : number, y : number, 
+    abstract spawn(id : number, x : number, y : number, 
         speedx : number, speedy : number) : void;
 }
 
@@ -158,8 +159,71 @@ abstract class CollisionObject extends SpawnableObject {
         this.radius = 0.0;
     }
 
-    //
-    // TODO: Collisions
-    //
+
+    protected wallCollisionEvent(ev : GameEvent) {}
+
+
+    private pointCollision(x : number, y : number, ev : GameEvent) {
+
+        let dist = Math.hypot(this.pos.x - x, this.pos.y - y);
+
+        if (dist > this.radius) 
+            return false;
+
+        let dir = (new Vector2(this.pos.x - x, this.pos.y - y)).normalize();
+
+        this.pos.x += (this.radius - dist) * dir.x;
+        this.pos.y += (this.radius - dist) * dir.y;
+
+        this.speed.x += (this.radius-dist) * dir.x;
+        this.speed.y += (this.radius-dist) * dir.y;
+
+        return false;
+    }
+
+
+    private baseWallCollision(x1 : number, y1 : number, 
+        x2 : number, y2 : number, ev : GameEvent) : boolean {
+
+        // TODO: This fails if the points are given in a wrong
+        // order, that is, the normal points to a wrong direction.
+        // Fix this.
+
+        let u = (new Vector2(x2 - x1, y2 - y1)).normalize();
+        let v = new Vector2(-u.y, u.x);
+
+        let d = Vector2.dot(new Vector2(this.pos.x - x1, this.pos.y - y1), u);
+
+		let x0 = x1 + d * u.x;
+        let y0 = y1 + d * u.y;
+
+        let dist = Math.hypot(this.pos.x - x0, this.pos.y - y0);
+
+        if (dist > this.radius) 
+            return false;
+
+        let wallDist = (this.radius-dist);
+
+        this.pos.x -= v.x * wallDist;
+        this.pos.y -= v.y * wallDist;
+
+        this.speed.x -= v.x * wallDist;
+        this.speed.y -= v.y * wallDist;
+
+        this.wallCollisionEvent(ev);
+        
+        return true;
+    }
+
+    
+    public wallCollision(x1 : number, y1 : number, 
+        x2 : number, y2 : number, ev : GameEvent) : boolean {
+        
+        if (!this.exist || this.dying) return false;
+
+        return this.baseWallCollision(x1, y1, x2, y2, ev) ||
+            this.pointCollision(x1, y1, ev) ||
+            this.pointCollision(x2, y2, ev);   
+    }
 }
 

@@ -24,10 +24,10 @@ class Player extends CollisionObject {
     private spinStartFrame : number;
     private spinStartFrameReached : boolean;
 
-    private readonly magic : ObjectGenerator<Magic>;
+    private readonly bullets : ObjectGenerator<Bullet>;
 
 
-    constructor(x : number, y : number, magic : ObjectGenerator<Magic>) {
+    constructor(x : number, y : number, bullets : ObjectGenerator<Bullet>) {
 
         super(x, y);
 
@@ -52,7 +52,9 @@ class Player extends CollisionObject {
         this.spinning = false;
         this.spinStartFrameReached = false;
 
-        this.magic = magic;
+        this.bullets = bullets;
+
+        this.radius = 6;
     }
 
 
@@ -116,7 +118,7 @@ class Player extends CollisionObject {
 
             this.usingMagic = true;
 
-            this.magic.spawn(
+            this.bullets.spawn(0,
                 this.pos.x + XOFF[this.faceColumn], 
                 this.pos.y + YOFF[this.faceColumn],
                 DIR_X[this.faceColumn] * MAGIC_SPEED, 

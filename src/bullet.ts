@@ -8,28 +8,54 @@
 class Bullet extends CollisionObject {
 
 
+    private friendly : boolean;
+    private id : number;
+
+
     constructor() {
 
         super(0, 0);
 
         this.exist = false;
-        
+        this.id = 0;
+        this.friendly = false;
+        this.radius = 4;
+
+        this.spr = new Sprite(16, 16);
     }
 
 
-    public outsideCameraEvent() {
+    protected outsideCameraEvent() {
 
         this.exist = false;
         this.dying = false;
     }
 
 
-    public spawn(x : number, y : number,
+    protected updateLogic(ev : GameEvent) {
+
+        const ANIM_SPEED = 4;
+
+        this.spr.animate(this.id, 0, 2, ANIM_SPEED, ev.step);
+    }
+
+
+    protected wallCollisionEvent(ev : GameEvent) {
+
+        this.stopMovement();
+        this.dying = true;
+    }
+
+
+    public spawn(id : number, x : number, y : number,
             speedx : number, speedy : number) {
 
         this.pos = new Vector2(x, y);
         this.speed = new Vector2(speedx, speedy);
         this.target = this.speed.clone();
+
+        this.id = id;
+        this.friendly = id == 0;
 
         this.exist = true;
     }
@@ -37,18 +63,16 @@ class Bullet extends CollisionObject {
 
     public draw(c : Canvas) {
 
-        if (!this.inCamera) return;
+        if (!this.inCamera || !this.exist) return;
 
         let px = Math.round(this.pos.x);
         let py = Math.round(this.pos.y);
 
         c.setFillColor(255, 0, 0);
-        c.fillRect(px - 2, py - 2, 5, 5);
+        c.drawSprite(this.spr, c.getBitmap("bullet"), 
+            px - this.spr.width/2, py - this.spr.height/2);
     }
-}
 
 
-class Magic extends Bullet {
-
-    // ...
+    public isFriendly = () => this.friendly;
 }

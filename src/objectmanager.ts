@@ -10,32 +10,26 @@ class ObjectManager {
 
     private player : Player;
     private bullets : ObjectGenerator<Bullet>;
-    private magic : ObjectGenerator<Magic>;
 
     private objectRenderBuffer : Array<GameObject>;
 
 
     constructor() {
 
-        this.magic = new ObjectGenerator<Magic> (Magic);
-        this.player = new Player(80, 72, this.magic);
         this.bullets = new ObjectGenerator<Bullet> (Bullet);
+        this.player = new Player(80, 72, this.bullets);
 
         this.objectRenderBuffer = new Array<GameObject> ();
     }
 
 
-    private pushObjectToRenderBuffer(o : GameObject) {
-
-        this.objectRenderBuffer.push(o);
-    }
-
-
-    public update(cam : Camera, ev : GameEvent) {
+    public update(cam : Camera, stage : Stage, ev : GameEvent) {
 
         this.player.update(ev);
+        stage.objectCollisions(this.player, cam, ev);
+
         this.bullets.update(cam, ev);
-        this.magic.update(cam, ev);
+        this.bullets.stageCollisions(stage, cam, ev);
     }
 
 
@@ -44,7 +38,6 @@ class ObjectManager {
         // Push object to the array
         this.objectRenderBuffer.push(this.player);
         this.bullets.pushObjectsToArray(this.objectRenderBuffer);
-        this.magic.pushObjectsToArray(this.objectRenderBuffer);
 
         // NOTE: getCoordY should be faster than getPos().y, because no cloning
         // is involved
