@@ -54,7 +54,7 @@ class Player extends CollisionObject {
 
         this.bullets = bullets;
 
-        this.radius = 6;
+        this.hitbox = new Vector2(8, 6);
     }
 
 
@@ -474,22 +474,22 @@ class Player extends CollisionObject {
         let my = 0;
         let move = false;
 
-        if (this.pos.y + this.radius >= topLeft.y + cam.height) {
+        if (this.pos.y + this.hitbox.y/2 >= topLeft.y + cam.height) {
 
             my = 1;
             move = true;
         }
-        else if (this.pos.y - this.radius <= topLeft.y) {
+        else if (this.pos.y - this.hitbox.y/2 <= topLeft.y) {
 
             my = -1;
             move = true;
         }
-        else if (this.pos.x + this.radius >= topLeft.x + cam.width) {
+        else if (this.pos.x + this.hitbox.x/2 >= topLeft.x + cam.width) {
 
             mx = 1;
             move = true;
         }
-        else if (this.pos.x - this.radius <= topLeft.x) {
+        else if (this.pos.x - this.hitbox.x/2 <= topLeft.x) {
 
             mx = -1;
             move = true;
@@ -504,13 +504,13 @@ class Player extends CollisionObject {
 
     public cameraMovement(cam : Camera, ev : GameEvent) {
 
-        let speed = cam.getSpeed() * this.radius * 2;
+        let speed = cam.getSpeed() * 2;
         let dir = cam.getDirection();
 
         let moveMod = Math.abs(dir.y) > Math.abs(dir.x) ? cam.width/cam.height : 1;
         speed *= moveMod;
 
-        this.pos.x += dir.x * speed * ev.step;
-        this.pos.y += dir.y * speed * ev.step; 
+        this.pos.x += dir.x * speed * this.hitbox.x/2 * ev.step;
+        this.pos.y += dir.y * speed * this.hitbox.y/2 * ev.step; 
     }
 }

@@ -5,6 +5,39 @@
  */
 
 
+const ROOM_WIDTH = 10;
+const ROOM_HEIGHT = 8;
+
+
+class Room {
+
+    public readonly walls : Array<boolean>;
+
+
+    constructor(left : boolean, right : boolean, down : boolean, up : boolean) {
+
+        this.walls = [left, right, down, up];
+    }
+
+
+    public getOverlayingTile(tmap : Tilemap, x : number, y : number) : number {
+
+        let tid = 0;
+        for (let i = 3; i >= 0 && tid == 0; -- i) {
+
+            if (this.walls[i]) {
+
+                tid = tmap.getTile(i+1, x, y);
+                if (tid != 0)
+                    return tid;
+            }
+        }
+
+        return tmap.getTile(0, x, y);
+    }
+}
+
+
 class Stage {
 
 
@@ -12,17 +45,55 @@ class Stage {
     public readonly height : number;
     
     private baseLayer : Array<number>;
+    private baseRoom : Tilemap;
+
+    private rooms : Array<Room>;
 
 
-    constructor(ev : GameEvent) {
+    constructor(roomCountX : number, roomCountY : number, ev : GameEvent) {
 
-        let baseRoom = ev.getTilemap("baseRoom");
+        this.baseRoom = ev.getTilemap("baseRoom");
 
         // Construct a base room
         // (temp stage size)
-        this.width = 10;
-        this.height = 8;
-        this.baseLayer = baseRoom.cloneLayer(0);
+        this.width = ROOM_WIDTH * roomCountX;
+        this.height = ROOM_HEIGHT * roomCountY;
+        this.baseLayer = new Array<number> (this.width * this.height);
+
+        this.rooms = (new Array<Room> (roomCountX * roomCountY))
+            .fill(null)
+            .map( (a, i) => new Room( 
+                i % roomCountX == 0, 
+                i % roomCountX == roomCountX-1, 
+                ((i / roomCountX) | 0) == roomCountY-1, 
+                i < roomCountX));
+
+        for (let y = 0; y < roomCountY; ++ y) {
+
+            for (let x = 0; x < roomCountX; ++ x) {
+
+                this.buildRoom(x, y, this.rooms[y * roomCountX + x]);
+            }
+        }
+    }
+
+
+    private buildRoom(roomX : number, roomY : number, r : Room) {
+
+        let dx = roomX * ROOM_WIDTH;
+        let dy = roomY * ROOM_HEIGHT;
+        
+        let tid = 0;
+
+        for (let y = 0; y < ROOM_HEIGHT; ++ y) {
+
+            for (let x = 0; x < ROOM_WIDTH; ++ x) {
+
+                tid = r.getOverlayingTile(this.baseRoom, x, y);
+
+                this.baseLayer[(dy + y) * this.width + (dx + x)] = tid;
+            }
+        }
     }
 
 
@@ -51,14 +122,14 @@ class Stage {
         let startx = ((cam.getWorldPos().x / 16) | 0) - 1;
         let starty = ((cam.getWorldPos().y / 16) | 0) - 1;
 
-        let endx = startx + ((cam.width / 16) | 0) + 2;
-        let endy = starty + ((cam.height / 16) | 0) + 2;
+        let endx = startx + ROOM_WIDTH + 2;
+        let endy = starty + ROOM_HEIGHT + 2;
 
         for (let y = starty; y <= endy; ++ y) {
 
             for (let x = startx; x <= endx; ++ x) {
 
-                tid = this.getTile(negMod(x, this.width), negMod(y, this.height));
+                tid = this.getTile(x, y);
                 if (tid <= 0) continue;
 
                 -- tid;
@@ -80,9 +151,10 @@ class Stage {
 
         let topLeft = cam.getWorldPos();
 
-        o.wallCollision(topLeft.x, topLeft.y + 128, topLeft.x + 160, topLeft.y + 128, ev);
-        o.wallCollision(topLeft.x + 160, topLeft.y, topLeft.x, topLeft.y, ev)
-        o.wallCollision(topLeft.x, topLeft.y, topLeft.x, topLeft.y + 128, ev)
-        o.wallCollision(topLeft.x + 160, topLeft.y + 128, topLeft.x + 160, topLeft.y, ev)
+        o.verticalCollision(topLeft.x, topLeft.y + 128, 160, 1, ev);
+        o.verticalCollision(topLeft.x, topLeft.y, 160, -1, ev)
+
+        o.horizontalCollision(topLeft.x, topLeft.y, 128, -1, ev)
+        o.horizontalCollision(topLeft.x + 160, topLeft.y, 128, 1, ev)
     }
 }

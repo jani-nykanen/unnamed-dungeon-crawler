@@ -155,81 +155,102 @@ abstract class SpawnableObject extends GameObject {
 abstract class CollisionObject extends SpawnableObject {
 
 
-    protected radius : number;
+    protected collisionBox : Vector2;
+    protected bounceFactor : number;
 
 
     constructor(x : number, y : number) {
 
         super(x, y);
 
-        this.radius = 0.0;
+        this.collisionBox = new Vector2();
+        this.bounceFactor = 0;
     }
 
 
     protected wallCollisionEvent(ev : GameEvent) {}
 
 
-    private pointCollision(x : number, y : number, ev : GameEvent) {
 
-        let dist = Math.hypot(this.pos.x - x, this.pos.y - y);
+    public horizontalCollision(
+        x : number, y : number, h : number, 
+        dir : number, ev : GameEvent, force = false) {
 
-        if (dist > this.radius) 
+        const V_MARGIN = 1;
+        const NEAR_MARGIN = 1;
+        const FAR_MARGIN = 2;
+        
+        if (!this.inCamera ||
+            //(!force && this.disableCollisions) ||
+            !this.exist || this.dying || 
+            this.speed.x * dir < 0) 
             return false;
 
-        let dir = (new Vector2(this.pos.x - x, this.pos.y - y)).normalize();
+        let top = this.pos.y + this.center.y - this.collisionBox.y/2;
+        let bottom = top + this.collisionBox.y;
 
-        this.pos.x += (this.radius - dist) * dir.x;
-        this.pos.y += (this.radius - dist) * dir.y;
+        if (bottom <= y + V_MARGIN || top >= y + h - V_MARGIN)
+            return false;
 
-        this.speed.x += (this.radius-dist) * dir.x;
-        this.speed.y += (this.radius-dist) * dir.y;
+        let xoff = this.center.x + this.collisionBox.x/2 * dir;
+        let nearOld = this.oldPos.x + xoff
+        let nearNew = this.pos.x + xoff;
+
+        if ((dir > 0 && nearNew >= x - NEAR_MARGIN*ev.step &&
+             nearOld <= x + (FAR_MARGIN + this.speed.x)*ev.step) || 
+             (dir < 0 && nearNew <= x + NEAR_MARGIN*ev.step &&
+             nearOld >= x - (FAR_MARGIN - this.speed.x)*ev.step)) {
+
+            this.pos.x = x - xoff;
+            this.wallCollisionEvent( ev);
+
+            this.speed.x *= -this.bounceFactor;
+
+            return true;
+        }
 
         return false;
-    }
+    }    
 
 
-    private baseWallCollision(x1 : number, y1 : number, 
-        x2 : number, y2 : number, ev : GameEvent) : boolean {
+    public verticalCollision(
+        x : number, y : number, w : number, 
+        dir : number, ev : GameEvent, force = false) {
 
-        // TODO: This fails if the points are given in a wrong
-        // order, that is, the normal points to a wrong direction.
-        // Fix this.
-
-        let u = (new Vector2(x2 - x1, y2 - y1)).normalize();
-        let v = new Vector2(-u.y, u.x);
-
-        let d = Vector2.dot(new Vector2(this.pos.x - x1, this.pos.y - y1), u);
-
-		let x0 = x1 + d * u.x;
-        let y0 = y1 + d * u.y;
-
-        let dist = Math.hypot(this.pos.x - x0, this.pos.y - y0);
-
-        if (dist > this.radius) 
+        const H_MARGIN = 1;
+        const NEAR_MARGIN = 1;
+        const FAR_MARGIN = 2;
+        
+        if (!this.inCamera ||
+            //(!force && this.disableCollisions) ||
+            !this.exist || this.dying || 
+            this.speed.y * dir < 0) 
             return false;
 
-        let wallDist = (this.radius-dist);
+        let left = this.pos.x + this.center.x - this.collisionBox.x/2;
+        let right = left + this.collisionBox.x;
 
-        this.pos.x -= v.x * wallDist;
-        this.pos.y -= v.y * wallDist;
+        if (right <= x + H_MARGIN || left >= x + w - H_MARGIN)
+            return false;
 
-        this.speed.x -= v.x * wallDist;
-        this.speed.y -= v.y * wallDist;
+        let yoff = this.center.y + this.collisionBox.y/2 * dir;
+        let nearOld = this.oldPos.y + yoff
+        let nearNew = this.pos.y + yoff;
 
-        this.wallCollisionEvent(ev);
-        
-        return true;
-    }
+        if ((dir > 0 && nearNew >= y - NEAR_MARGIN*ev.step &&
+             nearOld <= y + (FAR_MARGIN + this.speed.y)*ev.step) || 
+             (dir < 0 && nearNew <= y + NEAR_MARGIN*ev.step &&
+             nearOld >= y - (FAR_MARGIN - this.speed.y)*ev.step)) {
 
-    
-    public wallCollision(x1 : number, y1 : number, 
-        x2 : number, y2 : number, ev : GameEvent) : boolean {
-        
-        if (!this.exist || this.dying) return false;
+            this.pos.y = y - yoff;
+            this.wallCollisionEvent( ev);
 
-        return this.baseWallCollision(x1, y1, x2, y2, ev) ||
-            this.pointCollision(x1, y1, ev) ||
-            this.pointCollision(x2, y2, ev);   
-    }
+            this.speed.y *= -this.bounceFactor;
+
+            return true;
+        }
+
+        return false;
+    }    
 }
 

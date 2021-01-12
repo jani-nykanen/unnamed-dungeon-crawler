@@ -19,9 +19,10 @@ class Bullet extends CollisionObject {
         this.exist = false;
         this.id = 0;
         this.friendly = false;
-        this.radius = 4;
+        this.collisionBox = new Vector2(4, 4);
+        this.hitbox = this.collisionBox.clone();
 
-        this.spr = new Sprite(16, 16);
+        this.spr = new Sprite(24, 24);
     }
 
 
@@ -44,9 +45,9 @@ class Bullet extends CollisionObject {
 
     protected updateLogic(ev : GameEvent) {
 
-        const ANIM_SPEED = 4;
+        const ANIM_SPEED = 3;
 
-        this.spr.animate(this.id, 0, 2, ANIM_SPEED, ev.step);
+        this.spr.animate(this.id, 0, 3, ANIM_SPEED, ev.step);
     }
 
 
