@@ -114,7 +114,7 @@ class Player extends CollisionObject {
 
             this.stopMovement();
 
-            this.spr.setFrame(2, this.spr.getRow() + 6);
+            this.spr.setFrame(1, this.spr.getRow() + 6);
 
             this.usingMagic = true;
 
@@ -172,94 +172,111 @@ class Player extends CollisionObject {
     }
 
 
+    private animateSwordFighting(ev : GameEvent) {
+
+        const ATTACK_SPEED = 6;
+        const ATTACK_FINAL_FRAME = 20;
+
+        this.spr.animate(this.spr.getRow(), 0, 3, 
+                this.spr.getColumn() == 2 ? ATTACK_FINAL_FRAME : ATTACK_SPEED, 
+                ev.step);
+        if (this.spr.getColumn() == 3 || 
+            (this.spr.getColumn() == 2 && 
+            this.spr.getTimer() >= ATTACK_SPEED &&
+            (ev.getAction("fire2") & State.DownOrPressed) == 0)) {
+
+            this.attacking = false;
+            this.readyingSpinAttack = this.spr.getColumn() == 3;
+        }
+        else {
+
+            this.sprSword.setFrame(this.spr.getColumn() + 3, this.spr.getRow()); 
+        }
+    }
+
+
+    private animateSpinning(ev : GameEvent) {
+
+        const SPIN_ATTACK_SPEED = 4;
+
+        let row = 0;
+        let oldFrame = this.spr.getColumn();
+
+        this.flip = Flip.None;
+
+        this.spr.animate(this.spr.getRow(), 0, 3, SPIN_ATTACK_SPEED, ev.step);
+        if (!this.spinStartFrameReached &&
+            oldFrame != this.spinStartFrame &&
+            this.spr.getColumn() == this.spinStartFrame) {
+
+            this.spinStartFrameReached = true;
+        }
+
+        if (this.spinStartFrameReached &&
+            oldFrame == this.spinStartFrame &&
+            this.spr.getColumn() != oldFrame) {
+
+            this.spinning = false;
+
+            if (this.spinStartFrame != 3) {
+
+                row = this.spinStartFrame % 3;
+            }
+            else {
+
+                row = 1;
+            }
+            this.spr.setFrame(0, row);
+
+            this.flip = this.spinStartFrame == 1 ? Flip.Horizontal : Flip.None;
+        }
+        else {
+
+            this.sprSword.setFrame(this.spr.getColumn() + 4, this.spr.getRow());
+        }  
+    }
+
+
+    private animateMagicCast(ev : GameEvent) {
+
+        const MAGIC_TIME = 20;
+
+        this.spr.animate(this.spr.getRow(), 1, 2, MAGIC_TIME, ev.step);
+        if (this.spr.getColumn() == 2) {
+
+            this.usingMagic = false;
+            this.spr.setFrame(0, this.spr.getRow() % 3);
+        }    
+    }
+
+
     private animate(ev : GameEvent) {
 
         const EPS = 0.01;
         const BASE_RUN_SPEED = 12;
         const RUN_SPEED_MOD = 4;
-        const ATTACK_SPEED = 6;
-        const ATTACK_FINAL_FRAME = 20;
         const ROLL_SPEED = 4;
-        const SPIN_ATTACK_SPEED = 4;
-        const MAGIC_TIME = 20;
 
         // TODO: Fix the "bug" where the character won't get
         // animated but moves if the player keeps tapping
         // keys
 
-        // TODO 2: Put different animations to own methods
-        // for cleaner code
-
-        let animSpeed = 0;
-        let oldFrame = this.spr.getColumn();
-        let row = -1;
-
         if (this.usingMagic) {
 
-            this.spr.animate(this.spr.getRow(), 2, 3, MAGIC_TIME, ev.step);
-            if (this.spr.getColumn() == 3) {
-
-                this.usingMagic = false;
-            }
-            else {
-
-                return;
-            }
+            this.animateMagicCast(ev);
+            return;
         }
 
         if (this.spinning) {
 
-            this.flip = Flip.None;
-
-            this.spr.animate(this.spr.getRow(), 0, 3, SPIN_ATTACK_SPEED, ev.step);
-            if (!this.spinStartFrameReached &&
-                oldFrame != this.spinStartFrame &&
-                this.spr.getColumn() == this.spinStartFrame) {
-
-                this.spinStartFrameReached = true;
-            }
-
-            if (this.spinStartFrameReached &&
-                oldFrame == this.spinStartFrame &&
-                this.spr.getColumn() != oldFrame) {
-
-                this.spinning = false;
-
-                if (this.spinStartFrame != 3) {
-
-                    row = this.spinStartFrame % 3;
-                }
-                else {
-
-                    row = 1;
-                }
-                this.flip = this.spinStartFrame == 1 ? Flip.Horizontal : Flip.None;
-            }
-            else {
-
-                this.sprSword.setFrame(this.spr.getColumn() + 4, this.spr.getRow());
-                return;
-            }
+            this.animateSpinning(ev);
+            return;
         }
 
         if (this.attacking) {
 
-            this.spr.animate(this.spr.getRow(), 0, 3, 
-                this.spr.getColumn() == 2 ? ATTACK_FINAL_FRAME : ATTACK_SPEED, 
-                ev.step);
-            if (this.spr.getColumn() == 3 || 
-                (this.spr.getColumn() == 2 && 
-                this.spr.getTimer() >= ATTACK_SPEED &&
-                (ev.getAction("fire2") & State.DownOrPressed) == 0)) {
-
-                this.attacking = false;
-                this.readyingSpinAttack = this.spr.getColumn() == 3;
-            }
-            else {
-
-                this.sprSword.setFrame(this.spr.getColumn() + 3, this.spr.getRow());
-                return;
-            }
+            this.animateSwordFighting(ev);
+            return;
         }
 
         if (this.rolling) {
@@ -268,8 +285,8 @@ class Player extends CollisionObject {
             return;
         }
 
-        if (row < 0)
-            row = this.spr.getRow() % 3;
+        let row = this.spr.getRow() % 3;
+        let animSpeed = 0;
 
         // Determine direction (read: row)
         if (this.target.length() > EPS) {
@@ -352,28 +369,30 @@ class Player extends CollisionObject {
 
         let dir = this.flip == Flip.None ? 1 : -1;
 
+        let frame = this.sprSword.getColumn() - 3;
+
         switch(this.spr.getRow() % 3) {
 
         case 0:
 
             c.drawSprite(this.sprSword, c.getBitmap("player"),
-                px - 20 + 5 * (this.sprSword.getColumn()-3), 
-                py - 6 + 2 * (this.sprSword.getColumn()-3));
+                px - 16 + frame * 8, 
+                py - 4);
             break;
 
         case 1:
 
             c.drawSprite(this.sprSword, c.getBitmap("player"),
-                px - 1 + 7 * (dir - 1) + dir * 3 * (this.sprSword.getColumn()-3), 
-                py - 24 + 4 * (this.sprSword.getColumn()-3),
+                px + 3 - (dir < 0 ? 22 : 0), 
+                py - 16 + frame * 4,
                 this.flip);
             break;
 
         case 2:
 
             c.drawSprite(this.sprSword, c.getBitmap("player"),
-                px + 6 - 6 * (this.sprSword.getColumn()-3), 
-                py - 20 - 2 * (this.sprSword.getColumn()-3));
+                px - frame * 8, 
+                py - 22);
             break;
 
         default:
