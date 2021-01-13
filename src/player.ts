@@ -371,6 +371,9 @@ class Player extends CollisionObject {
 
         let frame = this.sprSword.getColumn() - 3;
 
+        // TODO: Lookup table for coordinate shift,
+        // no need for switch case
+
         switch(this.spr.getRow() % 3) {
 
         case 0:

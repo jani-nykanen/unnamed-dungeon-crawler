@@ -38,6 +38,19 @@ class Room {
 }
 
 
+let generateRoomMap = (w : number, h : number, seed = 0) : Array<Room> => {
+
+    // TEMP
+    return (new Array<Room> (w * h))
+        .fill(null)
+        .map( (a, i) => new Room( 
+            i % w == 0, 
+            i % w == w-1, 
+            ((i / w) | 0) == h-1, 
+            i < w));
+}
+
+
 class Stage {
 
 
@@ -60,13 +73,7 @@ class Stage {
         this.height = ROOM_HEIGHT * roomCountY;
         this.baseLayer = new Array<number> (this.width * this.height);
 
-        this.rooms = (new Array<Room> (roomCountX * roomCountY))
-            .fill(null)
-            .map( (a, i) => new Room( 
-                i % roomCountX == 0, 
-                i % roomCountX == roomCountX-1, 
-                ((i / roomCountX) | 0) == roomCountY-1, 
-                i < roomCountX));
+        this.rooms = generateRoomMap(roomCountX, roomCountY);
 
         for (let y = 0; y < roomCountY; ++ y) {
 

@@ -4,6 +4,9 @@ all: out
 out:
 	tsc
 
+out_npx:
+	npx tsc
+
 server:
 	python3 -m http.server
 
