@@ -84,6 +84,15 @@ class Tilemap {
     }
 
 
+    public getIndexedTile(l : number, i : number) {
+
+        if (l < 0 || l >= this.layers.length || i < 0 || i >= this.width*this.height)
+            return -1;
+
+        return this.layers[l][i];
+    }
+
+
     public cloneLayer(l : number) : Array<number> {
 
         if (l < 0 || l >= this.layers.length) 

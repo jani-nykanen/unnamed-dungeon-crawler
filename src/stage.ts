@@ -8,6 +8,31 @@
 const ROOM_WIDTH = 10;
 const ROOM_HEIGHT = 8;
 
+// For collisions
+const COL_DOWN = 0b0001;
+const COL_WALL_LEFT = 0b0010;
+const COL_WALL_RIGHT = 0b0100;
+const COL_UP = 0b1000;
+
+
+const COLLISION_TABLE = [
+        COL_DOWN,
+        COL_WALL_RIGHT,
+        COL_UP,
+        COL_WALL_LEFT,
+        COL_DOWN | COL_UP,
+        COL_WALL_LEFT | COL_WALL_RIGHT,
+        COL_WALL_LEFT | COL_DOWN,
+        COL_WALL_RIGHT | COL_DOWN,
+        COL_WALL_RIGHT | COL_UP,
+        COL_WALL_LEFT | COL_UP,
+        COL_WALL_LEFT | COL_DOWN | COL_WALL_RIGHT,
+        COL_WALL_RIGHT | COL_DOWN | COL_UP,
+        COL_WALL_LEFT | COL_UP | COL_WALL_RIGHT,
+        COL_WALL_LEFT | COL_DOWN | COL_UP,
+        COL_WALL_LEFT | COL_DOWN | COL_WALL_RIGHT | COL_UP,
+];
+
 
 class Room {
 
@@ -59,6 +84,7 @@ class Stage {
     
     private baseLayer : Array<number>;
     private baseRoom : Tilemap;
+    private collisionMap : Tilemap;
 
     private rooms : Array<Room>;
 
@@ -66,6 +92,7 @@ class Stage {
     constructor(roomCountX : number, roomCountY : number, ev : GameEvent) {
 
         this.baseRoom = ev.getTilemap("baseRoom");
+        this.collisionMap = ev.getTilemap("collisions");
 
         // Construct a base room
         // (temp stage size)
@@ -152,16 +179,62 @@ class Stage {
     }
 
 
+    private handeTileCollision(o : CollisionObject, x : number, y : number, 
+            colId : number, ev : GameEvent) {
+
+        if ((colId & COL_DOWN) == COL_DOWN) {
+
+            o.verticalCollision(x*16, y*16, 16, 1, ev);
+        }
+        if ((colId & COL_UP) == COL_UP) {
+
+            o.verticalCollision(x*16, (y+1)*16, 16, -1, ev);
+        }
+
+        if ((colId & COL_WALL_RIGHT) == COL_WALL_RIGHT) {
+
+            o.horizontalCollision((x+1)*16, y*16, 16, -1, ev);
+        }
+        if ((colId & COL_WALL_LEFT) == COL_WALL_LEFT) {
+
+            o.horizontalCollision(x*16, y*16, 16, 1, ev);
+        }
+    }
+
+
     public objectCollisions(o : CollisionObject, cam : Camera, ev : GameEvent) {
+
+        const RADIUS = 2;
 
         if (!o.doesExist() || o.isDying()) return;
 
+        let px = Math.floor(o.getPos().x / 16);
+        let py = Math.floor(o.getPos().y / 16);
+
+        let tid, colId;
+
+        for (let y = py - RADIUS; y <= py + RADIUS; ++ y) {
+
+            for (let x = px - RADIUS; x <= px + RADIUS; ++ x) {
+
+                tid = this.getTile(x, y);
+                if (tid <= 0) continue;
+
+                colId = this.collisionMap.getIndexedTile(0, tid-1);
+                if (colId <= 0) continue;
+
+                this.handeTileCollision(o, x, y, colId-1, ev);
+            }
+        }
+
+
+        // TEMP
+        /*
         let topLeft = cam.getWorldPos();
-
         o.verticalCollision(topLeft.x, topLeft.y + 128, 160, 1, ev);
-        o.verticalCollision(topLeft.x, topLeft.y, 160, -1, ev)
-
-        o.horizontalCollision(topLeft.x, topLeft.y, 128, -1, ev)
-        o.horizontalCollision(topLeft.x + 160, topLeft.y, 128, 1, ev)
+        o.verticalCollision(topLeft.x, topLeft.y, 160, -1, ev);
+        o.horizontalCollision(topLeft.x, topLeft.y, 128, -1, ev);
+        o.horizontalCollision(topLeft.x + 160, topLeft.y, 128, 1, ev);
+        */
     }
 }
