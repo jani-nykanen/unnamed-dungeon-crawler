@@ -15,9 +15,12 @@ class Game implements Scene {
 
     constructor(param : any, ev : GameEvent) {
 
+        const MAP_WIDTH = 6;
+        const MAX_HEIGHT = 8;
+
         this.objects = new ObjectManager();
         this.cam = new Camera(0, 0, 160, 128);
-        this.stage = new Stage(3, 4, this.cam, ev);
+        this.stage = new Stage(MAP_WIDTH, MAX_HEIGHT, this.cam, ev);
 
         this.objects.initialize(this.cam);
     }
