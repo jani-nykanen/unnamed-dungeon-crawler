@@ -32,6 +32,7 @@ class Player extends CollisionObject {
         super(x, y);
 
         this.spr = new Sprite(16, 16);
+        this.spr.setFrame(0, 2);
         this.sprSword = new Sprite(16, 16);
 
         this.friction = new Vector2(0.1, 0.1);
@@ -255,7 +256,7 @@ class Player extends CollisionObject {
 
         const EPS = 0.01;
         const BASE_RUN_SPEED = 12;
-        const RUN_SPEED_MOD = 4;
+        const RUN_SPEED_MOD = 5;
         const ROLL_SPEED = 4;
 
         // TODO: Fix the "bug" where the character won't get
@@ -347,11 +348,18 @@ class Player extends CollisionObject {
     }
 
 
+    protected updateProperties(ev : GameEvent) {
+
+        this.bounceFactor = this.rolling ? 1 : 0;
+    }
+
+
     protected updateLogic(ev : GameEvent) {
 
         this.control(ev);
         this.updateTimers(ev);
         this.animate(ev);
+        this.updateProperties(ev);
     }
 
 
@@ -516,5 +524,14 @@ class Player extends CollisionObject {
 
         this.pos.x += dir.x * speed * this.hitbox.x/2 * ev.step;
         this.pos.y += dir.y * speed * this.hitbox.y/2 * ev.step; 
+    }
+
+
+    public setInitialPosition(cam : Camera) {
+
+        let x = cam.getWorldPos().x + cam.width / 2;
+        let y = cam.getWorldPos().y + cam.height / 2;
+
+        this.pos = new Vector2(x, y);
     }
 }

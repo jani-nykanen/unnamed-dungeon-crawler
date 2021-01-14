@@ -23,6 +23,12 @@ class ObjectManager {
     }
 
 
+    public initialize(cam : Camera) {
+
+        this.player.setInitialPosition(cam);
+    }
+
+
     public cameraMovement(cam : Camera, ev : GameEvent) {
 
         this.player.cameraMovement(cam, ev);

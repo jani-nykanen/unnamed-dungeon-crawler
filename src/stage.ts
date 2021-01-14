@@ -34,48 +34,6 @@ const COLLISION_TABLE = [
 ];
 
 
-class Room {
-
-    public readonly walls : Array<boolean>;
-
-
-    constructor(left : boolean, right : boolean, down : boolean, up : boolean) {
-
-        this.walls = [left, right, down, up];
-    }
-
-
-    public getOverlayingTile(tmap : Tilemap, x : number, y : number) : number {
-
-        let tid = 0;
-        for (let i = 3; i >= 0 && tid == 0; -- i) {
-
-            if (this.walls[i]) {
-
-                tid = tmap.getTile(i+1, x, y);
-                if (tid != 0)
-                    return tid;
-            }
-        }
-
-        return tmap.getTile(0, x, y);
-    }
-}
-
-
-let generateRoomMap = (w : number, h : number, seed = 0) : Array<Room> => {
-
-    // TEMP
-    return (new Array<Room> (w * h))
-        .fill(null)
-        .map( (a, i) => new Room( 
-            i % w == 0, 
-            i % w == w-1, 
-            ((i / w) | 0) == h-1, 
-            i < w));
-}
-
-
 class Stage {
 
 
@@ -89,7 +47,7 @@ class Stage {
     private rooms : Array<Room>;
 
 
-    constructor(roomCountX : number, roomCountY : number, ev : GameEvent) {
+    constructor(roomCountX : number, roomCountY : number, cam : Camera, ev : GameEvent) {
 
         this.baseRoom = ev.getTilemap("baseRoom");
         this.collisionMap = ev.getTilemap("collisions");
@@ -100,7 +58,11 @@ class Stage {
         this.height = ROOM_HEIGHT * roomCountY;
         this.baseLayer = new Array<number> (this.width * this.height);
 
-        this.rooms = generateRoomMap(roomCountX, roomCountY);
+        let roomMap = new RoomMap(roomCountX, roomCountY);
+        this.rooms = roomMap.cloneRoomArray();
+
+        let startPos = roomMap.getStartPos();
+        cam.setPos(startPos.x, startPos.y);
 
         for (let y = 0; y < roomCountY; ++ y) {
 

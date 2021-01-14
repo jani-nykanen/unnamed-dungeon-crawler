@@ -65,6 +65,8 @@ class Bullet extends CollisionObject {
         this.speed = new Vector2(speedx, speedy);
         this.target = this.speed.clone();
 
+        this.spr.setFrame(0, this.id);
+
         this.id = id;
         this.friendly = id == 0;
 

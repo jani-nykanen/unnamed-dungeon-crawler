@@ -176,6 +176,7 @@ abstract class CollisionObject extends SpawnableObject {
         x : number, y : number, h : number, 
         dir : number, ev : GameEvent, force = false) {
 
+        const EPS = 0.001;
         const V_MARGIN = 1;
         const NEAR_MARGIN = 1;
         const FAR_MARGIN = 2;
@@ -183,7 +184,7 @@ abstract class CollisionObject extends SpawnableObject {
         if (!this.inCamera ||
             //(!force && this.disableCollisions) ||
             !this.exist || this.dying || 
-            this.speed.x * dir < 0) 
+            this.speed.x * dir < EPS) 
             return false;
 
         let top = this.pos.y + this.center.y - this.collisionBox.y/2;
@@ -217,6 +218,7 @@ abstract class CollisionObject extends SpawnableObject {
         x : number, y : number, w : number, 
         dir : number, ev : GameEvent, force = false) {
 
+        const EPS = 0.001;
         const H_MARGIN = 1;
         const NEAR_MARGIN = 1;
         const FAR_MARGIN = 2;
@@ -224,7 +226,7 @@ abstract class CollisionObject extends SpawnableObject {
         if (!this.inCamera ||
             //(!force && this.disableCollisions) ||
             !this.exist || this.dying || 
-            this.speed.y * dir < 0) 
+            this.speed.y * dir < EPS) 
             return false;
 
         let left = this.pos.x + this.center.x - this.collisionBox.x/2;

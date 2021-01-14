@@ -17,7 +17,9 @@ class Game implements Scene {
 
         this.objects = new ObjectManager();
         this.cam = new Camera(0, 0, 160, 128);
-        this.stage = new Stage(3, 4, ev);
+        this.stage = new Stage(3, 4, this.cam, ev);
+
+        this.objects.initialize(this.cam);
     }
 
 

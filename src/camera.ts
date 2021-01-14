@@ -38,6 +38,14 @@ class Camera {
     }
 
 
+    public setPos(x : number, y : number) {
+
+        this.pos = new Vector2(x, y);
+        this.target = this.pos.clone();
+        this.worldPos = new Vector2(x * this.width, y * this.height);
+    }
+
+
     public move(dx : number, dy : number, speed : number) : boolean {
 
         if (this.moving) return false;
