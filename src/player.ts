@@ -35,7 +35,7 @@ class Player extends CollisionObject {
         this.sprSword = new Sprite(16, 16);
 
         this.friction = new Vector2(0.1, 0.1);
-        this.center = new Vector2(0, 7);
+        this.center = new Vector2();
 
         this.rolling = false;
         this.rollTimer = 0.0;let dir = new Vector2();
@@ -55,6 +55,7 @@ class Player extends CollisionObject {
         this.bullets = bullets;
 
         this.hitbox = new Vector2(8, 6);
+        this.collisionBox = new Vector2(6, 4);
     }
 
 
@@ -425,8 +426,8 @@ class Player extends CollisionObject {
         let px = Math.round(this.pos.x);
         let py = Math.round(this.pos.y);
 
-        let xoff = (this.center.x + this.spr.width/2);
-        let yoff = (this.center.y + this.spr.height/2);
+        let xoff = this.spr.width/2;
+        let yoff = 7 + this.spr.height/2;
 
         c.setGlobalAlpha(0.67);
         c.drawBitmapRegion(shadow, 

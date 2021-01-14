@@ -182,20 +182,22 @@ class Stage {
     private handeTileCollision(o : CollisionObject, x : number, y : number, 
             colId : number, ev : GameEvent) {
 
-        if ((colId & COL_DOWN) == COL_DOWN) {
+        let c = COLLISION_TABLE[colId];
+
+        if ((c & COL_DOWN) == COL_DOWN) {
 
             o.verticalCollision(x*16, y*16, 16, 1, ev);
         }
-        if ((colId & COL_UP) == COL_UP) {
+        if ((c & COL_UP) == COL_UP) {
 
             o.verticalCollision(x*16, (y+1)*16, 16, -1, ev);
         }
 
-        if ((colId & COL_WALL_RIGHT) == COL_WALL_RIGHT) {
+        if ((c & COL_WALL_RIGHT) == COL_WALL_RIGHT) {
 
             o.horizontalCollision((x+1)*16, y*16, 16, -1, ev);
         }
-        if ((colId & COL_WALL_LEFT) == COL_WALL_LEFT) {
+        if ((c & COL_WALL_LEFT) == COL_WALL_LEFT) {
 
             o.horizontalCollision(x*16, y*16, 16, 1, ev);
         }
