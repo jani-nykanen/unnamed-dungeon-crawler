@@ -19,6 +19,8 @@ let setActions = (core : Core) => {
 
 let loadAssets = (core : Core) => {
 
+    const ROOM_MAP_COUNT = 1;
+
     // Bitmaps
     [
         {name: "font", path: "assets/bitmaps/font.png"},
@@ -28,11 +30,15 @@ let loadAssets = (core : Core) => {
         {name: "bullet", path: "assets/bitmaps/bullets.png"} 
     ].map(a => core.loadBitmap(a.name, a.path));
 
-    // Tilemaps
+    // Base tilemaps
     [
         {name: "baseRoom", path: "assets/maps/base_room.tmx"},
         {name: "collisions", path: "assets/maps/collisions.tmx"},
     ].map(a => core.loadTilemap(a.name, a.path));
+
+    (new Array(ROOM_MAP_COUNT)).fill(null).map((a, i) => 
+        {return {name: "room" + String(i+1), path: "assets/maps/" + String(i+1) + ".tmx"}})
+        .map(a => core.loadTilemap(a.name, a.path));
 }
 
 

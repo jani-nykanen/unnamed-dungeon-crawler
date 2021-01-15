@@ -68,24 +68,31 @@ class Stage {
 
             for (let x = 0; x < roomCountX; ++ x) {
 
-                this.buildRoom(x, y, this.rooms[y * roomCountX + x]);
+                this.buildRoom(x, y, this.rooms[y * roomCountX + x],
+                    ev.getTilemap("room1"));
             }
         }
     }
 
 
-    private buildRoom(roomX : number, roomY : number, r : Room) {
+    private buildRoom(roomX : number, roomY : number, 
+        r : Room, decorationMap : Tilemap) {
 
         let dx = roomX * ROOM_WIDTH;
         let dy = roomY * ROOM_HEIGHT;
         
         let tid = 0;
+        let m : Tilemap;
 
         for (let y = 0; y < ROOM_HEIGHT; ++ y) {
 
             for (let x = 0; x < ROOM_WIDTH; ++ x) {
 
-                tid = r.getOverlayingTile(this.baseRoom, x, y);
+                m = (x == 0 || y == 0 || 
+                    x == ROOM_WIDTH-1 || y == ROOM_HEIGHT-1) ? 
+                    this.baseRoom : decorationMap;
+
+                tid = r.getOverlayingTile(m, x, y);
 
                 this.baseLayer[(dy + y) * this.width + (dx + x)] = tid;
             }
