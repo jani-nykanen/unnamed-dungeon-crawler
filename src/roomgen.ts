@@ -214,10 +214,9 @@ class RoomMap {
     private fixWallMap() : boolean {
 
         let [reached, count] = this.genReachArray();
-        console.log(count);
+
         if (count >= this.width*this.height) 
             return true;
-
         
         let startDir = (Math.random() * 4) | 0;
         let dir = 0;

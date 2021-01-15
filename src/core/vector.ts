@@ -71,4 +71,10 @@ class Vector2 {
 
 		return u.x*v.x + u.y*v.y;
 	}
+
+
+	static normalize(v : Vector2, forceUnit = false) : Vector2 {
+
+		return v.clone().normalize(forceUnit);
+	}
 }

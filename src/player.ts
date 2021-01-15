@@ -169,7 +169,7 @@ class Player extends CollisionObject {
         this.target = ev.getStick().scalarMultiply(BASE_SPEED);
         if (this.target.length() > EPS) {
 
-            this.faceDirection = this.target.normalize();
+            this.faceDirection = Vector2.normalize(this.target);
         }
     }
 
@@ -252,6 +252,50 @@ class Player extends CollisionObject {
     }
 
 
+    private reverseRolling() {
+
+        let newRow = 0;
+        switch (this.spr.getRow() % 3) {
+
+        case 0:
+
+            newRow = 2;
+            break;
+
+        case 1:
+
+            newRow = 0;
+            this.flip = this.flip == Flip.Horizontal ? Flip.None : Flip.Horizontal;
+            break;
+
+        case 2:
+
+            newRow = -2;
+            break;
+
+        default:
+            break;
+        }
+
+        this.spr.setFrame(this.spr.getColumn(),  
+            this.spr.getRow() + newRow, true);
+        
+        this.faceColumn = newRow == 1 ? 3 : newRow;
+        // this.faceDirection = Vector2.normalize(this.speed, true);
+
+        let dirx = 0;
+        let diry = 0;
+        switch(this.spr.getRow() % 3) {
+
+        case 0: diry = 1; break;
+        case 1: dirx = this.flip == Flip.None ? 1 : -1; break;
+        case 2: diry = -1; break;
+        default: break;
+        }
+        this.faceDirection = new Vector2(dirx, diry);
+    }
+
+
     private animate(ev : GameEvent) {
 
         const EPS = 0.01;
@@ -315,7 +359,6 @@ class Player extends CollisionObject {
 
             this.spr.setFrame(0, row, true);
         }
-        
     }
 
 
@@ -351,6 +394,23 @@ class Player extends CollisionObject {
     protected updateProperties(ev : GameEvent) {
 
         this.bounceFactor = this.rolling ? 1 : 0;
+    }
+
+
+    protected wallCollisionEvent(dirx : number, diry : number, ev : GameEvent) {
+
+        const EPS = 0.01;
+
+        if (this.rolling) {
+
+            this.reverseRolling();
+
+            if (Math.abs(dirx) > EPS)
+                this.target.x = Math.sign(this.speed.x) * Math.abs(this.target.x);
+
+            if (Math.abs(diry) > EPS)  
+                this.target.y = Math.sign(this.speed.y) * Math.abs(this.target.y);
+        }
     }
 
 
@@ -534,4 +594,5 @@ class Player extends CollisionObject {
 
         this.pos = new Vector2(x, y);
     }
+    
 }

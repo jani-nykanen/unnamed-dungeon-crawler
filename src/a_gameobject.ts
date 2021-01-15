@@ -168,7 +168,7 @@ abstract class CollisionObject extends SpawnableObject {
     }
 
 
-    protected wallCollisionEvent(ev : GameEvent) {}
+    protected wallCollisionEvent(dirx : number, diry : number, ev : GameEvent) {}
 
 
 
@@ -203,9 +203,9 @@ abstract class CollisionObject extends SpawnableObject {
              nearOld >= x - (FAR_MARGIN - this.speed.x)*ev.step)) {
 
             this.pos.x = x - xoff;
-            this.wallCollisionEvent(ev);
-
             this.speed.x *= -this.bounceFactor;
+
+            this.wallCollisionEvent(dir, 0, ev);
 
             return true;
         }
@@ -245,9 +245,9 @@ abstract class CollisionObject extends SpawnableObject {
              nearOld >= y - (FAR_MARGIN - this.speed.y)*ev.step)) {
 
             this.pos.y = y - yoff;
-            this.wallCollisionEvent(ev);
-
             this.speed.y *= -this.bounceFactor;
+
+            this.wallCollisionEvent(0, dir, ev);
 
             return true;
         }

@@ -51,7 +51,7 @@ class Bullet extends CollisionObject {
     }
 
 
-    protected wallCollisionEvent(ev : GameEvent) {
+    protected wallCollisionEvent(dirx : number, diry : number, ev : GameEvent) {
 
         this.stopMovement();
         this.dying = true;
