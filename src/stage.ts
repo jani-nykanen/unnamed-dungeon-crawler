@@ -68,8 +68,9 @@ class Stage {
 
             for (let x = 0; x < roomCountX; ++ x) {
 
+                // TODO: Make randomizing elsewhere
                 this.buildRoom(x, y, this.rooms[y * roomCountX + x],
-                    ev.getTilemap("room1"));
+                    ev.getTilemap("room" + String(1 + (Math.random() * ROOM_MAP_COUNT) | 0)));
             }
         }
     }

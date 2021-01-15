@@ -5,6 +5,8 @@
  */
 
 
+const ROOM_MAP_COUNT = 2;
+
 
 let setActions = (core : Core) => {
 
@@ -18,8 +20,6 @@ let setActions = (core : Core) => {
 
 
 let loadAssets = (core : Core) => {
-
-    const ROOM_MAP_COUNT = 1;
 
     // Bitmaps
     [
