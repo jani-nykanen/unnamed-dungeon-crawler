@@ -37,4 +37,13 @@ class PlayerStatus {
     public getBulletCount = () : number => this.bulletCount;
     public getGemCount = () : number => this.gems;
     public getTime = () : number => this.time;
+
+
+    public reduceBullet(count : number) : boolean {
+
+        let newCount = this.bulletCount - count;
+        this.bulletCount = Math.max(0, newCount)
+
+        return this.bulletCount == newCount;
+    }
 }   

@@ -16,6 +16,8 @@ class Player extends CollisionObject {
 
     private sprSword : Sprite;
     private attacking : boolean;
+    private swordHitbox : Rect;
+    private swordHitId : number; 
     private usingMagic : boolean;
 
     private spinAttackTimer : number;
@@ -61,6 +63,9 @@ class Player extends CollisionObject {
 
         this.hitbox = new Vector2(8, 6);
         this.collisionBox = new Vector2(6, 4);
+
+        this.swordHitId = -1;
+        this.swordHitbox = new Rect();
     }
 
 
@@ -87,6 +92,48 @@ class Player extends CollisionObject {
     }
 
 
+    private computeSwordHitbox() {
+
+        const WIDTH = 24;
+        const HEIGHT = 14;
+
+        let x = this.pos.x;
+        let y = this.pos.y;
+        let w = 0;
+        let h = 0;
+
+        switch(this.spr.getRow() % 3) {
+
+        case 2:
+            y -= this.spr.height + HEIGHT/2;
+        case 0:
+            x -= WIDTH/2;
+            w = WIDTH;
+            h = HEIGHT;
+            break;
+
+        case 1:
+
+            y -= WIDTH/2 + 3;
+
+            if (this.flip == Flip.None)
+                x += this.spr.width/2;
+            else
+                x -= this.spr.width/2 + HEIGHT;
+
+            w = HEIGHT;
+            h = WIDTH;
+            
+            break;
+
+        default:
+            break;
+        }
+
+        this.swordHitbox = new Rect(x, y, w, h);
+    }
+
+
     private swordAttack(ev : GameEvent) : boolean {
         
         if (ev.getAction("fire2") == State.Pressed) {
@@ -97,6 +144,9 @@ class Player extends CollisionObject {
             this.sprSword.setFrame(3, this.spr.getRow());
 
             this.attacking = true;
+
+            ++ this.swordHitId;
+            this.computeSwordHitbox();
 
             return true;
         }
@@ -117,6 +167,10 @@ class Player extends CollisionObject {
 
         if (!this.readyingSpinAttack &&
             ev.getAction("fire3") == State.Pressed) {
+
+            // TODO: Sound effect if fails?
+            if (!this.status.reduceBullet(1)) 
+                return false;
 
             this.stopMovement();
 
@@ -431,6 +485,11 @@ class Player extends CollisionObject {
 
         let px = Math.round(this.pos.x);
         let py = Math.round(this.pos.y);
+
+        // TEMP: draw hitbox
+        c.setFillColor(255, 0, 0);
+        c.fillRect(this.swordHitbox.x, this.swordHitbox.y,
+            this.swordHitbox.w, this.swordHitbox.h);
 
         // Might need this if the center changes
         /*
