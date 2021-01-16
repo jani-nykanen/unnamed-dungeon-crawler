@@ -40,6 +40,31 @@ class Game implements Scene {
     }
 
 
+    drawHUD(c : Canvas) {
+
+        let font = c.getBitmap("font");
+        let hud = c.getBitmap("hud");
+
+        c.drawBitmapRegion(hud, 0, 0, 160, 16,
+            0, 128);
+
+        // Health
+        c.drawBitmapRegion(font, 24, 0, 8, 8, 4, 133);
+        c.drawText(font, "10/10", 13, 133, -1, 0);
+
+        // Gems
+        c.drawBitmapRegion(font, 40, 0, 8, 8, 88, 133);
+        c.drawText(font, "00", 97, 133, 0, 0);
+
+        // Time
+        c.drawBitmapRegion(font, 32, 0, 8, 8, 120, 133);
+        // Minutes
+        c.drawText(font, "5:", 129, 133, -2, 0);
+        // Seconds
+        c.drawText(font, "00", 141, 133, 0, 0);
+    }
+
+
     redraw(c : Canvas) : void {
 
         c.clear(170, 170, 170);
@@ -49,11 +74,7 @@ class Game implements Scene {
         this.objects.draw(c);
 
         c.moveTo();
-
-        c.setFillColor(255, 170, 0);
-        c.fillRect(0, 128, 160, 16);
-        c.drawText(c.getBitmap("font"), "Hello world!",
-            2, 130, -1, 0);
+        this.drawHUD(c);
     }
 
 

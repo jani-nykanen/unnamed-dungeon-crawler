@@ -5,6 +5,8 @@
  */
 
 
+// TODO: Move this to "loadAssets" and determine
+// available amount of maps other way in stage.ts
 const ROOM_MAP_COUNT = 4;
 
 
@@ -27,7 +29,8 @@ let loadAssets = (core : Core) => {
         {name: "player", path: "assets/bitmaps/player.png"},
         {name: "tileset", path: "assets/bitmaps/tileset.png"},
         {name: "shadow", path: "assets/bitmaps/shadow.png"},
-        {name: "bullet", path: "assets/bitmaps/bullets.png"} 
+        {name: "bullet", path: "assets/bitmaps/bullets.png"},
+        {name: "hud", path: "assets/bitmaps/hud.png"}
     ].map(a => core.loadBitmap(a.name, a.path));
 
     // Base tilemaps
