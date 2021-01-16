@@ -55,6 +55,7 @@ class Bullet extends CollisionObject {
 
         this.stopMovement();
         this.dying = true;
+        this.ignoreDeathOnCollision = true;
     }
 
 
@@ -71,6 +72,7 @@ class Bullet extends CollisionObject {
         this.friendly = id == 0;
 
         this.exist = true;
+        this.ignoreDeathOnCollision = false;
     }
 
 
@@ -102,4 +104,16 @@ class Bullet extends CollisionObject {
 
 
     public isFriendly = () => this.friendly;
+
+
+    public attackCollisionCheck(x : number, y : number, w : number, h : number) : boolean {
+
+        const RADIUS = 16;
+
+        return this.dying && 
+            boxOverlay(this.pos, 
+            new Vector2(), 
+            new Vector2(RADIUS, RADIUS),
+            x, y, w, h);
+    }
 }

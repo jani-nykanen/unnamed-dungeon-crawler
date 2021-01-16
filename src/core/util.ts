@@ -45,7 +45,7 @@ function updateSpeedAxis(speed : number, target : number, step : number) {
 
 
 function boxOverlay(pos : Vector2, center : Vector2, hitbox : Vector2, 
-    x : number, y : number, w : number, h : number) {
+    x : number, y : number, w : number, h : number) : boolean {
 
     let px = pos.x + center.x - hitbox.x/2;
     let py = pos.y + center.y - hitbox.y/2;
@@ -54,6 +54,16 @@ function boxOverlay(pos : Vector2, center : Vector2, hitbox : Vector2,
            py + hitbox.y >= y && py < y+h;
 }
 
+
+function boxOverlayRect(rect : Rect, 
+    x : number, y : number, w : number, h : number) : boolean {
+
+    return this.boxOverlay(
+        new Vector2(rect.x + rect.w/2, rect.y + rect.h/2), 
+        new Vector2(), 
+        new Vector2(rect.w, rect.h), 
+        x, y, w, h);
+}
 
 
 function compose<T> (f  : ((a : T) => T), g : ((a : T) => T)) : ((a : T) => T) {

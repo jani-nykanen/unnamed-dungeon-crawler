@@ -157,6 +157,7 @@ abstract class CollisionObject extends SpawnableObject {
 
     protected collisionBox : Vector2;
     protected bounceFactor : number;
+    protected ignoreDeathOnCollision : boolean;
 
 
     constructor(x : number, y : number) {
@@ -165,11 +166,12 @@ abstract class CollisionObject extends SpawnableObject {
 
         this.collisionBox = new Vector2();
         this.bounceFactor = 0;
+
+        this.ignoreDeathOnCollision = false;
     }
 
 
     protected wallCollisionEvent(dirx : number, diry : number, ev : GameEvent) {}
-
 
 
     public horizontalCollision(
@@ -254,5 +256,14 @@ abstract class CollisionObject extends SpawnableObject {
 
         return false;
     }    
+
+
+    public attackCollisionCheck(x : number, y : number, w : number, h: number) : boolean {
+
+        return false;
+    }
+
+
+    public doesIgnoreDeathOnCollision = () : boolean => this.ignoreDeathOnCollision;
 }
 

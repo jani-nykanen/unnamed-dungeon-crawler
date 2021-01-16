@@ -255,6 +255,18 @@ class Player extends CollisionObject {
     }
 
 
+
+    private computeSpinAttackHitbox() {
+
+        const RADIUS = 16;
+
+        this.swordHitbox = new Rect(
+            this.pos.x - RADIUS,
+            this.pos.y - 4 - RADIUS,
+            RADIUS*2, RADIUS*2);
+    }
+
+
     private animateSpinning(ev : GameEvent) {
 
         const SPIN_ATTACK_SPEED = 4;
@@ -294,6 +306,9 @@ class Player extends CollisionObject {
 
             this.sprSword.setFrame(this.spr.getColumn() + 4, this.spr.getRow());
         }  
+
+        // Not the best place for this, might be hard to find
+        this.computeSpinAttackHitbox();
     }
 
 
@@ -487,9 +502,11 @@ class Player extends CollisionObject {
         let py = Math.round(this.pos.y);
 
         // TEMP: draw hitbox
+        /*
         c.setFillColor(255, 0, 0);
         c.fillRect(this.swordHitbox.x, this.swordHitbox.y,
             this.swordHitbox.w, this.swordHitbox.h);
+        */
 
         // Might need this if the center changes
         /*
@@ -660,6 +677,13 @@ class Player extends CollisionObject {
         let y = cam.getWorldPos().y + cam.height / 2 + YOFF;
 
         this.pos = new Vector2(x, y);
+    }
+
+
+    public attackCollisionCheck(x : number, y : number, w : number, h : number) : boolean {
+
+        return (this.attacking || this.spinning) &&
+            boxOverlayRect(this.swordHitbox, x, y, w, h);
     }
     
 }

@@ -161,7 +161,8 @@ class Stage {
     }
 
 
-    private handeTileCollision(o : CollisionObject, x : number, y : number, 
+    private handeTileCollision(o : CollisionObject, 
+            x : number, y : number, 
             colId : number, ev : GameEvent) {
 
         let c = COLLISION_TABLE[colId];
@@ -186,11 +187,41 @@ class Stage {
     }
 
 
+    private handleSpecialTileCollision(o : CollisionObject, 
+        x : number, y : number, 
+        colId : number, ev : GameEvent) {
+            
+        const BUSH_OFFSET = 4;
+
+        switch (colId-16) {
+
+        case 0:
+
+            if (o.attackCollisionCheck(
+                x*16 + BUSH_OFFSET, y*16 + BUSH_OFFSET, 
+                16 - BUSH_OFFSET*2, 16 - BUSH_OFFSET*2)) {
+
+                this.baseLayer[y * this.width + x] -= 16;
+            }
+            else {
+
+                // "Box collision"
+                this.handeTileCollision(o, x, y, 14, ev);
+            }
+            break;
+
+        default:
+            break;
+        }
+    }
+
+
     public objectCollisions(o : CollisionObject, cam : Camera, ev : GameEvent) {
 
         const RADIUS = 2;
 
-        if (!o.doesExist() || o.isDying()) return;
+        if (!o.doesExist() || (!o.doesIgnoreDeathOnCollision() && o.isDying())) 
+            return;
 
         let px = Math.floor(o.getPos().x / 16);
         let py = Math.floor(o.getPos().y / 16);
@@ -207,7 +238,10 @@ class Stage {
                 colId = this.collisionMap.getIndexedTile(0, tid-1);
                 if (colId <= 0) continue;
 
-                this.handeTileCollision(o, x, y, colId-1, ev);
+                if (colId <= 16)
+                    this.handeTileCollision(o, x, y, colId-1, ev);
+                else 
+                    this.handleSpecialTileCollision(o, x, y, colId-1, ev);
             }
         }
 
