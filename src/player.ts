@@ -39,7 +39,7 @@ class Player extends CollisionObject {
         this.center = new Vector2();
 
         this.rolling = false;
-        this.rollTimer = 0.0;let dir = new Vector2();
+        this.rollTimer = 0.0;
         this.faceDirection = new Vector2(0, 1);
         this.faceColumn = 0;
 
@@ -584,6 +584,8 @@ class Player extends CollisionObject {
 
         this.pos.x += dir.x * speed * this.hitbox.x/2 * ev.step;
         this.pos.y += dir.y * speed * this.hitbox.y/2 * ev.step; 
+
+        this.animate(ev);
     }
 
 

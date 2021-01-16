@@ -5,7 +5,7 @@
  */
 
 
-const ROOM_MAP_COUNT = 2;
+const ROOM_MAP_COUNT = 4;
 
 
 let setActions = (core : Core) => {
