@@ -25,9 +25,12 @@ class Player extends CollisionObject {
     private spinStartFrameReached : boolean;
 
     private readonly bullets : ObjectGenerator<Bullet>;
+    private readonly status : PlayerStatus;
 
 
-    constructor(x : number, y : number, bullets : ObjectGenerator<Bullet>) {
+    constructor(x : number, y : number, 
+        bullets : ObjectGenerator<Bullet>,
+        status : PlayerStatus) {
 
         super(x, y);
 
@@ -54,6 +57,7 @@ class Player extends CollisionObject {
         this.spinStartFrameReached = false;
 
         this.bullets = bullets;
+        this.status = status;
 
         this.hitbox = new Vector2(8, 6);
         this.collisionBox = new Vector2(6, 4);
@@ -591,8 +595,10 @@ class Player extends CollisionObject {
 
     public setInitialPosition(cam : Camera) {
 
+        const YOFF = 40;
+
         let x = cam.getWorldPos().x + cam.width / 2;
-        let y = cam.getWorldPos().y + cam.height / 2;
+        let y = cam.getWorldPos().y + cam.height / 2 + YOFF;
 
         this.pos = new Vector2(x, y);
     }

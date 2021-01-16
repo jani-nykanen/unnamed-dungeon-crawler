@@ -36,6 +36,7 @@ let loadAssets = (core : Core) => {
     // Base tilemaps
     [
         {name: "baseRoom", path: "assets/maps/base_room.tmx"},
+        {name: "startRoom", path: "assets/maps/start_room.tmx"},
         {name: "collisions", path: "assets/maps/collisions.tmx"},
     ].map(a => core.loadTilemap(a.name, a.path));
 

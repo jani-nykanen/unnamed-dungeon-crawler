@@ -41,7 +41,6 @@ class Stage {
     public readonly height : number;
     
     private baseLayer : Array<number>;
-    private baseRoom : Tilemap;
     private collisionMap : Tilemap;
 
     private rooms : Array<Room>;
@@ -49,7 +48,6 @@ class Stage {
 
     constructor(roomCountX : number, roomCountY : number, cam : Camera, ev : GameEvent) {
 
-        this.baseRoom = ev.getTilemap("baseRoom");
         this.collisionMap = ev.getTilemap("collisions");
 
         // Construct a base room
@@ -58,26 +56,39 @@ class Stage {
         this.height = ROOM_HEIGHT * roomCountY;
         this.baseLayer = new Array<number> (this.width * this.height);
 
+        let baseRoom = ev.getTilemap("baseRoom");
         let roomMap = new RoomMap(roomCountX, roomCountY);
         this.rooms = roomMap.cloneRoomArray();
 
         let startPos = roomMap.getStartPos();
         cam.setPos(startPos.x, startPos.y);
-
+        
+        let wallData : Tilemap;
+        let roomData : Tilemap;
         for (let y = 0; y < roomCountY; ++ y) {
 
             for (let x = 0; x < roomCountX; ++ x) {
 
-                // TODO: Make randomizing elsewhere
-                this.buildRoom(x, y, this.rooms[y * roomCountX + x],
-                    ev.getTilemap("room" + String(1 + (Math.random() * ROOM_MAP_COUNT) | 0)));
+                if (x == startPos.x && y == startPos.y) {
+                    
+                    roomData = ev.getTilemap("startRoom");
+                    wallData = roomData;
+                }
+                else {
+                    
+                    wallData = baseRoom;
+                    roomData = ev.getTilemap("room" + String(1 + (Math.random() * ROOM_MAP_COUNT) | 0));
+                }
+
+                this.buildRoom(x, y, this.rooms[y * roomCountX + x], 
+                    wallData, roomData);
             }
         }
     }
 
 
     private buildRoom(roomX : number, roomY : number, 
-        r : Room, decorationMap : Tilemap) {
+        r : Room, wallMap : Tilemap, decorationMap : Tilemap) {
 
         let dx = roomX * ROOM_WIDTH;
         let dy = roomY * ROOM_HEIGHT;
@@ -91,8 +102,9 @@ class Stage {
 
                 m = (x == 0 || y == 0 || 
                     x == ROOM_WIDTH-1 || y == ROOM_HEIGHT-1) ? 
-                    this.baseRoom : decorationMap;
+                    wallMap: decorationMap;
 
+                
                 tid = r.getOverlayingTile(m, x, y);
 
                 this.baseLayer[(dy + y) * this.width + (dx + x)] = tid;

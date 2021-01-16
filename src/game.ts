@@ -11,6 +11,7 @@ class Game implements Scene {
     private objects : ObjectManager;
     private cam : Camera;
     private stage : Stage;
+    private status : PlayerStatus;
 
 
     constructor(param : any, ev : GameEvent) {
@@ -18,7 +19,9 @@ class Game implements Scene {
         const MAP_WIDTH = 6;
         const MAX_HEIGHT = 8;
 
-        this.objects = new ObjectManager();
+        this.status = new PlayerStatus(10, 3, 0, 300);
+
+        this.objects = new ObjectManager(this.status);
         this.cam = new Camera(0, 0, 160, 128);
         this.stage = new Stage(MAP_WIDTH, MAX_HEIGHT, this.cam, ev);
 
@@ -26,7 +29,7 @@ class Game implements Scene {
     }
 
 
-    refresh(ev : GameEvent) : void {
+    public refresh(ev : GameEvent) : void {
         
         this.cam.update(ev);
         if (this.cam.isMoving()) {
@@ -37,10 +40,17 @@ class Game implements Scene {
 
         this.stage.update(ev);
         this.objects.update(this.cam, this.stage, ev);
+
+        if (this.status.update(ev)) {
+
+            // Time up!
+        }
     }
 
 
-    drawHUD(c : Canvas) {
+    private drawHUD(c : Canvas) {
+
+        const TEXT_Y = 133;
 
         let font = c.getBitmap("font");
         let hud = c.getBitmap("hud");
@@ -49,23 +59,35 @@ class Game implements Scene {
             0, 128);
 
         // Health
-        c.drawBitmapRegion(font, 24, 0, 8, 8, 4, 133);
-        c.drawText(font, "10/10", 13, 133, -1, 0);
+        let x = 4;
+        c.drawBitmapRegion(font, 24, 0, 8, 8, x, TEXT_Y);
+        c.drawText(font, 
+            String(this.status.getHealth()) + "/" + String(this.status.getMaxHealth()),
+            x+9, TEXT_Y, -1, 0);
+
+        // Bullets
+        x = 56;
+        c.drawBitmapRegion(font, 48, 0, 8, 8, x, TEXT_Y);
+        c.drawText(font, createStringWithZeros(this.status.getBulletCount(), 2), x + 9, TEXT_Y, 0, 0);
 
         // Gems
-        c.drawBitmapRegion(font, 40, 0, 8, 8, 88, 133);
-        c.drawText(font, "00", 97, 133, 0, 0);
+        x = 88;
+        c.drawBitmapRegion(font, 40, 0, 8, 8, x, TEXT_Y);
+        c.drawText(font, createStringWithZeros(this.status.getGemCount(), 2), x + 9, TEXT_Y, 0, 0);
 
         // Time
-        c.drawBitmapRegion(font, 32, 0, 8, 8, 120, 133);
+        x = 120;
+        c.drawBitmapRegion(font, 32, 0, 8, 8, x, TEXT_Y);
+
+        let str = genTimeString(this.status.getTime());
         // Minutes
-        c.drawText(font, "5:", 129, 133, -2, 0);
+        c.drawText(font, str.substr(0, str.length-2) , x+9, TEXT_Y, -2, 0);
         // Seconds
-        c.drawText(font, "00", 141, 133, 0, 0);
+        c.drawText(font, str.substr(str.length-2, 2), x+21, TEXT_Y, 0, 0);
     }
 
 
-    redraw(c : Canvas) : void {
+    public redraw(c : Canvas) : void {
 
         c.clear(170, 170, 170);
 
@@ -78,7 +100,7 @@ class Game implements Scene {
     }
 
 
-    dispose() : any {
+    public dispose() : any {
 
         return null;
     }

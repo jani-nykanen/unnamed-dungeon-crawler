@@ -60,3 +60,26 @@ function compose<T> (f  : ((a : T) => T), g : ((a : T) => T)) : ((a : T) => T) {
 
     return (a : T) => f(g(a));
 }
+
+
+function genTimeString(time : number) : string {
+
+    let minutes = Math.floor(time / 3600);
+    let seconds = ((time / 60) | 0) % 60;
+
+    let str = String(minutes | 0) + ":";
+    if (seconds < 10)
+        str += "0";
+    str += String(seconds | 0);
+
+    return str;
+}
+
+
+// The name is confusing, so here's a example:
+// createStringWithZeros(12, 3) => "012";
+function createStringWithZeros(value : number, maxZeros : number) : string {
+
+    let str = String(value);
+    return "0".repeat(maxZeros - str.length) + str;
+}

@@ -14,10 +14,10 @@ class ObjectManager {
     private objectRenderBuffer : Array<GameObject>;
 
 
-    constructor() {
+    constructor(status : PlayerStatus) {
 
         this.bullets = new ObjectGenerator<Bullet> (Bullet);
-        this.player = new Player(80, 72, this.bullets);
+        this.player = new Player(80, 72, this.bullets, status);
 
         this.objectRenderBuffer = new Array<GameObject> ();
     }
