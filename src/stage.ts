@@ -44,6 +44,7 @@ class Stage {
     private collisionMap : Tilemap;
 
     private rooms : Array<Room>;
+    private leaves : ObjectGenerator<Leaf>;
 
 
     constructor(roomCountX : number, roomCountY : number, cam : Camera, ev : GameEvent) {
@@ -84,6 +85,8 @@ class Stage {
                     wallData, roomData);
             }
         }
+    
+        this.leaves = new ObjectGenerator<Leaf> (Leaf);
     }
 
 
@@ -122,9 +125,9 @@ class Stage {
     }
 
 
-    public update(ev : GameEvent) {
+    public update(cam : Camera, ev : GameEvent) {
 
-        // ...
+        this.leaves.update(cam, ev);
     }
 
 
@@ -161,6 +164,12 @@ class Stage {
     }
 
 
+    public pushLeavesToDrawBuffer(buffer : Array<GameObject>) {
+
+        this.leaves.pushObjectsToArray(buffer);
+    }
+
+
     private handeTileCollision(o : CollisionObject, 
             x : number, y : number, 
             colId : number, ev : GameEvent) {
@@ -187,9 +196,33 @@ class Stage {
     }
 
 
+    private spawnLeaves(x : number, y : number, count : number, id = 0) {
+
+        const MAX_SPEED = 1.5;
+        const MIN_SPEED = 0.5;
+        const GRAVITY_BONUS = -1.0;
+        const H_BONUS = 1.25;
+
+        let angle = 0;
+        let angleStep = Math.PI * 2 / count;
+        let sx, sy : number;
+        let speed : number;
+
+        for (let i = 0; i < count; ++ i) {
+
+            speed = Math.random() * (MAX_SPEED - MIN_SPEED) + MIN_SPEED;
+            angle = angleStep * i;
+            sx = Math.cos(angle) * speed * H_BONUS;
+            sy = Math.sin(angle) * speed + GRAVITY_BONUS;
+
+            this.leaves.spawn(id, x, y, sx, sy);
+        }
+    }
+
+
     private handleSpecialTileCollision(o : CollisionObject, 
         x : number, y : number, 
-        colId : number, ev : GameEvent) {
+        colId : number, tid : number, ev : GameEvent) {
             
         const BUSH_OFFSET = 4;
 
@@ -202,6 +235,7 @@ class Stage {
                 16 - BUSH_OFFSET*2, 16 - BUSH_OFFSET*2)) {
 
                 this.baseLayer[y * this.width + x] -= 16;
+                this.spawnLeaves(x*16 + 8, y*16 + 8, 6, (tid / 32) | 0);
             }
             else {
 
@@ -241,7 +275,8 @@ class Stage {
                 if (colId <= 16)
                     this.handeTileCollision(o, x, y, colId-1, ev);
                 else 
-                    this.handleSpecialTileCollision(o, x, y, colId-1, ev);
+                    this.handleSpecialTileCollision(
+                         o, x, y, colId-1, tid, ev);
             }
         }
 

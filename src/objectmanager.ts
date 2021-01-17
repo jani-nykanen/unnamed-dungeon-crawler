@@ -46,17 +46,21 @@ class ObjectManager {
     }
 
 
-    public draw(c : Canvas) {
+    public draw(c : Canvas, stage : Stage) {
+
 
         // Push object to the array
         this.objectRenderBuffer.push(this.player);
         this.bullets.pushObjectsToArray(this.objectRenderBuffer);
+        stage.pushLeavesToDrawBuffer(this.objectRenderBuffer);
 
         // NOTE: getCoordY should be faster than getPos().y, because no cloning
         // is involved
-        this.objectRenderBuffer.sort(
+        let sortedArray = 
+            this.objectRenderBuffer.sort(
             (a : GameObject, b : GameObject) => (a.getCoordY() - b.getCoordY()));
-        for (let o of this.objectRenderBuffer) {
+
+        for (let o of sortedArray) {
 
             o.draw(c);
         }
@@ -67,6 +71,6 @@ class ObjectManager {
         // Clear the render buffer array
         // TODO: Check if there is a better, faster and/or more
         // memory-safe method available
-        this.objectRenderBuffer.splice(0, this.objectRenderBuffer.length);
+        this.objectRenderBuffer.length = 0;
     }
 }

@@ -38,7 +38,7 @@ class Game implements Scene {
             return;
         }
 
-        this.stage.update(ev);
+        this.stage.update(this.cam, ev);
         this.objects.update(this.cam, this.stage, ev);
 
         if (this.status.update(ev)) {
@@ -93,7 +93,7 @@ class Game implements Scene {
 
         this.cam.use(c);
         this.stage.draw(c, this.cam);
-        this.objects.draw(c);
+        this.objects.draw(c, this.stage);
 
         c.moveTo();
         this.drawHUD(c);

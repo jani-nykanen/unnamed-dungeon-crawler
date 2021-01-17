@@ -5,7 +5,6 @@
  */
 
 
-
 class ObjectGenerator<T extends CollisionObject> {
 
 
@@ -83,7 +82,8 @@ class ObjectGenerator<T extends CollisionObject> {
 
         for (let o of this.objects) {
 
-            if (!o.doesExist) continue;
+            if (!o.doesExist() || !o.isInCamera()) 
+                continue;
 
             arr.push(o);
         }

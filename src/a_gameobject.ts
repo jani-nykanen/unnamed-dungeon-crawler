@@ -11,6 +11,7 @@
 // Needed for object generators (or not)
 abstract class ExistingObject {
 
+    
     protected exist : boolean;
 
 
