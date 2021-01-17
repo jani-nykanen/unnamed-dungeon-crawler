@@ -680,9 +680,11 @@ class Player extends CollisionObject {
     }
 
 
-    public attackCollisionCheck(x : number, y : number, w : number, h : number) : boolean {
+    public attackCollisionCheck(x : number, y : number, 
+        w : number, h : number, type = 0) : boolean {
 
-        return (this.attacking || this.spinning) &&
+        return type == 0 &&
+            (this.attacking || this.spinning) &&
             boxOverlayRect(this.swordHitbox, x, y, w, h);
     }
     

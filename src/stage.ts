@@ -226,16 +226,18 @@ class Stage {
             
         const BUSH_OFFSET = 4;
 
-        switch (colId-16) {
+        let t = colId - 16;
+        switch (t) {
 
         case 0:
+        case 1:
 
             if (o.attackCollisionCheck(
                 x*16 + BUSH_OFFSET, y*16 + BUSH_OFFSET, 
-                16 - BUSH_OFFSET*2, 16 - BUSH_OFFSET*2)) {
+                16 - BUSH_OFFSET*2, 16 - BUSH_OFFSET*2, t)) {
 
                 this.baseLayer[y * this.width + x] -= 16;
-                this.spawnLeaves(x*16 + 8, y*16 + 8, 6, (tid / 32) | 0);
+                this.spawnLeaves(x*16 + 8, y*16 + 8, 6, (tid / 32) | 0 + t*2);
             }
             else {
 

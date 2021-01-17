@@ -106,7 +106,8 @@ class Bullet extends CollisionObject {
     public isFriendly = () => this.friendly;
 
 
-    public attackCollisionCheck(x : number, y : number, w : number, h : number) : boolean {
+    public attackCollisionCheck(x : number, y : number, 
+        w : number, h : number, type = 0) : boolean {
 
         const RADIUS = 16;
 

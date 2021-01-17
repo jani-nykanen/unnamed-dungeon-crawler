@@ -259,7 +259,8 @@ abstract class CollisionObject extends SpawnableObject {
     }    
 
 
-    public attackCollisionCheck(x : number, y : number, w : number, h: number) : boolean {
+    public attackCollisionCheck(x : number, y : number, 
+        w : number, h: number, type = 0) : boolean {
 
         return false;
     }
