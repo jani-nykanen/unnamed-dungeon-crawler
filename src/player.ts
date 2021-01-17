@@ -26,6 +26,9 @@ class Player extends CollisionObject {
     private spinStartFrame : number;
     private spinStartFrameReached : boolean;
 
+    private knockbackTimer : number;
+    private hurtTimer : number;
+
     private readonly bullets : ObjectGenerator<Bullet>;
     private readonly status : PlayerStatus;
 
@@ -66,6 +69,9 @@ class Player extends CollisionObject {
 
         this.swordHitId = -1;
         this.swordHitbox = new Rect();
+
+        this.knockbackTimer = 0;
+        this.hurtTimer = 0;
     }
 
 
@@ -214,6 +220,12 @@ class Player extends CollisionObject {
         const BASE_SPEED = 1.0;
         const EPS = 0.01;
 
+        if (this.knockbackTimer > 0) {
+
+            this.target.zeros();
+            return;
+        }
+
         if (this.rolling  || this.attacking || 
             this.spinning || this.usingMagic) 
             return;
@@ -258,7 +270,7 @@ class Player extends CollisionObject {
 
     private computeSpinAttackHitbox() {
 
-        const RADIUS = 16;
+        const RADIUS = 18;
 
         this.swordHitbox = new Rect(
             this.pos.x - RADIUS,
@@ -376,6 +388,8 @@ class Player extends CollisionObject {
         const RUN_SPEED_MOD = 5;
         const ROLL_SPEED = 4;
 
+        if (this.knockbackTimer > 0) return;
+
         // TODO: Fix the "bug" where the character won't get
         // animated but moves if the player keeps tapping
         // keys
@@ -460,6 +474,17 @@ class Player extends CollisionObject {
         if (this.readyingSpinAttack) {
 
             this.spinAttackTimer = (this.spinAttackTimer + ev.step) % MAX_SPIN_ATTACK_TIME;
+        }
+
+        // Knockback
+        if (this.knockbackTimer > 0) {
+
+            this.knockbackTimer -= ev.step;
+        }
+        // Hurt
+        if (this.hurtTimer > 0) {   
+
+            this.hurtTimer -= ev.step;
         }
     }
 
@@ -577,12 +602,18 @@ class Player extends CollisionObject {
         let xoff = this.spr.width/2;
         let yoff = 7 + this.spr.height/2;
 
+        // Shadow
         c.setGlobalAlpha(0.67);
         c.drawBitmapRegion(shadow, 
             0, 0, 16, 8,
             px - shadow.width/4, 
             py - shadow.height/2);
         c.setGlobalAlpha();
+
+        // Flicker if hurt
+        if (this.hurtTimer > 0 && 
+            Math.round(this.hurtTimer / 4) % 2 != 0)
+            return;
 
         // Sword, back
         if (this.attacking && this.spr.getRow() % 3 > 0) {
@@ -687,5 +718,57 @@ class Player extends CollisionObject {
             (this.attacking || this.spinning) &&
             boxOverlayRect(this.swordHitbox, x, y, w, h);
     }
+
+
+    public hurt(dmg : number, ev : GameEvent) {
+
+        const HURT_TIME = 60;
+        const KNOCKBACK_TIME = 30;
+        const KNOCKBACK_SPEED = 2.25;
+
+        if (this.hurtTimer > 0) return;
+
+        this.hurtTimer = HURT_TIME;
+        this.knockbackTimer = KNOCKBACK_TIME;
+
+        this.speed.x = -KNOCKBACK_SPEED * this.faceDirection.x;
+        this.speed.y = -KNOCKBACK_SPEED * this.faceDirection.y;
+
+        // Determine column
+        let column = 0;
+        if (Math.abs(this.speed.y) > Math.abs(this.speed.x)) {
+
+            column = this.speed.y > 0.0 ? 2 : 0;
+            this.flip = Flip.None; 
+        }
+        else {
+
+            column = 1;
+            this.flip = this.speed.x < 0 ? Flip.None : Flip.Horizontal;
+        }
+        this.spr.setFrame(column, 10);
+
+        this.status.reduceHealth(dmg);
+    }
+
+
+    public hurtCollision(x : number, y : number, w : number, h : number,
+        dmg : number, ev : GameEvent) : boolean {
+
+        if (this.hurtTimer > 0 || this.rolling) 
+            return false;
+
+        if (boxOverlay(this.pos, this.center, this.collisionBox, x, y, w, h)) {
+
+            this.hurt(dmg, ev);
+
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public getSwordHitId = () => this.swordHitId;
     
 }

@@ -266,6 +266,13 @@ abstract class CollisionObject extends SpawnableObject {
     }
 
 
+    public hurtCollision(x : number, y : number, w : number, h : number, 
+        dmg : number, ev : GameEvent) : boolean {
+
+        return false;
+    }
+
+
     public doesIgnoreDeathOnCollision = () : boolean => this.ignoreDeathOnCollision;
 }
 

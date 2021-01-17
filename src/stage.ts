@@ -261,10 +261,15 @@ class Stage {
         colId : number, tid : number, ev : GameEvent) {
             
         const BUSH_OFFSET = 4;
+        // TODO: This makes it possible to 
+        // walk on water...
+        const HURT_OFFSET = 4;
+        const WATER_DMG = 2;
 
         let t = colId - 16;
         switch (t) {
 
+        // Bush or rock
         case 0:
         case 1:
 
@@ -273,13 +278,23 @@ class Stage {
                 16 - BUSH_OFFSET*2, 16 - BUSH_OFFSET*2, t)) {
 
                 this.baseLayer[y * this.width + x] -= 16;
-                this.spawnLeaves(x*16 + 8, y*16 + 8, 6, (tid / 32) | 0 + t*2);
+                this.spawnLeaves(x*16 + 8, y*16 + 8, 6, 
+                    // TODO: Replace this...
+                    clamp((tid / 32) | 0, 0, 1) + t*2);
             }
             else {
 
                 // "Box collision"
                 this.handeTileCollision(o, x, y, 14, ev);
             }
+            break;
+
+        // "Hurt"
+        case 2:
+
+            o.hurtCollision(x*16 + HURT_OFFSET, y*16 + HURT_OFFSET,
+                    16 - HURT_OFFSET*2, 16 - HURT_OFFSET*2, WATER_DMG, ev);
+
             break;
 
         default:

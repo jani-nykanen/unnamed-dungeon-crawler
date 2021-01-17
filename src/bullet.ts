@@ -109,7 +109,7 @@ class Bullet extends CollisionObject {
     public attackCollisionCheck(x : number, y : number, 
         w : number, h : number, type = 0) : boolean {
 
-        const RADIUS = 16;
+        const RADIUS = 24;
 
         return this.dying && 
             boxOverlay(this.pos, 

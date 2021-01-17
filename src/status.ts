@@ -46,4 +46,10 @@ class PlayerStatus {
 
         return this.bulletCount == newCount;
     }
+
+    
+    public reduceHealth(amount : number) {
+
+        this.health = Math.max(0, this.health - amount);
+    }
 }   

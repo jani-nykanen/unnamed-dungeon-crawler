@@ -7,7 +7,7 @@
 
 // TODO: Move this to "loadAssets" and determine
 // available amount of maps other way in stage.ts
-const ROOM_MAP_COUNT = 5;
+const ROOM_MAP_COUNT = 6;
 
 
 let setActions = (core : Core) => {
