@@ -46,6 +46,9 @@ class Stage {
     private rooms : Array<Room>;
     private leaves : ObjectGenerator<Leaf>;
 
+    private sprWater : Sprite;
+    private waterPos : number;
+
 
     constructor(roomCountX : number, roomCountY : number, cam : Camera, ev : GameEvent) {
 
@@ -87,6 +90,8 @@ class Stage {
         }
     
         this.leaves = new ObjectGenerator<Leaf> (Leaf);
+        this.sprWater = new Sprite(16, 16);
+        this.waterPos = 0;
     }
 
 
@@ -127,11 +132,42 @@ class Stage {
 
     public update(cam : Camera, ev : GameEvent) {
 
+        const WATER_ANIM_SPEED = 20;
+        const WATER_SPEED = 0.1;
+
+        this.sprWater.animate(0, 0, 3, WATER_ANIM_SPEED, ev.step);
         this.leaves.update(cam, ev);
+
+        this.waterPos = (this.waterPos + WATER_SPEED * ev.step) % 16;
+    }
+
+
+    public drawBackground(c : Canvas, cam : Camera) {
+
+        let shiftx = -cam.getWorldPos().x % 16;
+        let shifty = -cam.getWorldPos().y % 16;
+
+        let bmp = c.getBitmap("tileset");
+
+        let pos = this.waterPos | 0;
+
+        for (let y = -1; y < ROOM_HEIGHT+1; ++ y) {
+
+            for (let x = -1; x < ROOM_WIDTH+1; ++ x) {
+
+                c.drawBitmapRegion(bmp, 
+                    48 + this.sprWater.getColumn()*16, 96, 
+                    16, 16, 
+                    x*16 + shiftx - pos, 
+                    y*16 + shifty + pos);
+            }
+        }
     }
 
 
     public draw(c : Canvas, cam : Camera) {
+
+        const OMIT = [114];
 
         let tid;
         let sx, sy;
@@ -149,7 +185,7 @@ class Stage {
             for (let x = startx; x <= endx; ++ x) {
 
                 tid = this.getTile(x, y);
-                if (tid <= 0) continue;
+                if (tid <= 0 || OMIT.includes(tid)) continue;
 
                 -- tid;
 

@@ -91,6 +91,7 @@ class Game implements Scene {
 
         c.clear(170, 170, 170);
 
+        this.stage.drawBackground(c, this.cam);
         this.cam.use(c);
         this.stage.draw(c, this.cam);
         this.objects.draw(c, this.stage);
