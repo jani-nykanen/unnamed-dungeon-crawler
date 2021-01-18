@@ -31,10 +31,12 @@ class Player extends CollisionObject {
 
     private readonly bullets : ObjectGenerator<Bullet>;
     private readonly status : PlayerStatus;
+    private readonly dmgText : ObjectGenerator<PlayerDamageText>;
 
 
     constructor(x : number, y : number, 
         bullets : ObjectGenerator<Bullet>,
+        dmgText : ObjectGenerator<PlayerDamageText>,
         status : PlayerStatus) {
 
         super(x, y);
@@ -63,6 +65,7 @@ class Player extends CollisionObject {
 
         this.bullets = bullets;
         this.status = status;
+        this.dmgText = dmgText;
 
         this.hitbox = new Vector2(8, 6);
         this.collisionBox = new Vector2(6, 4);
@@ -720,47 +723,55 @@ class Player extends CollisionObject {
     }
 
 
-    public hurt(dmg : number, ev : GameEvent) {
+    public hurt(dmg : number, knockback : Vector2, ev : GameEvent) {
 
         const HURT_TIME = 60;
         const KNOCKBACK_TIME = 30;
         const KNOCKBACK_SPEED = 2.25;
+        const DAMAGE_TEXT_SPEED = -1.0;
 
         if (this.hurtTimer > 0) return;
 
         this.hurtTimer = HURT_TIME;
-        this.knockbackTimer = KNOCKBACK_TIME;
 
-        this.speed.x = -KNOCKBACK_SPEED * this.faceDirection.x;
-        this.speed.y = -KNOCKBACK_SPEED * this.faceDirection.y;
+        let column : number;
+        if (knockback != null) {
 
-        // Determine column
-        let column = 0;
-        if (Math.abs(this.speed.y) > Math.abs(this.speed.x)) {
+            this.knockbackTimer = KNOCKBACK_TIME;
 
-            column = this.speed.y > 0.0 ? 2 : 0;
-            this.flip = Flip.None; 
+            this.speed.x = -KNOCKBACK_SPEED * knockback.x;
+            this.speed.y = -KNOCKBACK_SPEED * knockback.y;
+
+            // Determine column
+            column = 0;
+            if (Math.abs(this.speed.y) > Math.abs(this.speed.x)) {
+
+                column = this.speed.y > 0.0 ? 2 : 0;
+                this.flip = Flip.None; 
+            }
+            else {
+
+                column = 1;
+                this.flip = this.speed.x < 0 ? Flip.None : Flip.Horizontal;
+            }
+            this.spr.setFrame(column, 10);
         }
-        else {
-
-            column = 1;
-            this.flip = this.speed.x < 0 ? Flip.None : Flip.Horizontal;
-        }
-        this.spr.setFrame(column, 10);
 
         this.status.reduceHealth(dmg);
+
+        this.dmgText.spawn(dmg, this.pos.x, this.pos.y-this.spr.height, 0, DAMAGE_TEXT_SPEED);
     }
 
 
     public hurtCollision(x : number, y : number, w : number, h : number,
-        dmg : number, ev : GameEvent) : boolean {
+        dmg : number, knockback : Vector2, ev : GameEvent) : boolean {
 
         if (this.hurtTimer > 0 || this.rolling) 
             return false;
 
         if (boxOverlay(this.pos, this.center, this.collisionBox, x, y, w, h)) {
 
-            this.hurt(dmg, ev);
+            this.hurt(dmg, knockback, ev);
 
             return true;
         }

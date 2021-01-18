@@ -45,7 +45,9 @@ class ObjectGenerator<T extends CollisionObject> {
 
         for (let o of this.objects) {
 
-            o.cameraCheck(cam);
+            if (cam != null)
+                o.cameraCheck(cam);
+                
             o.update(ev);
         }
     }

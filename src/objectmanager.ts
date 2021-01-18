@@ -10,6 +10,7 @@ class ObjectManager {
 
     private player : Player;
     private bullets : ObjectGenerator<Bullet>;
+    private plDmgText : ObjectGenerator<PlayerDamageText>;
 
     private objectRenderBuffer : Array<GameObject>;
 
@@ -17,7 +18,8 @@ class ObjectManager {
     constructor(status : PlayerStatus) {
 
         this.bullets = new ObjectGenerator<Bullet> (Bullet);
-        this.player = new Player(80, 72, this.bullets, status);
+        this.plDmgText = new ObjectGenerator<PlayerDamageText> (PlayerDamageText);
+        this.player = new Player(80, 72, this.bullets, this.plDmgText, status);
 
         this.objectRenderBuffer = new Array<GameObject> ();
     }
@@ -43,6 +45,8 @@ class ObjectManager {
 
         this.bullets.update(cam, ev);
         this.bullets.stageCollisions(stage, cam, ev);
+
+        this.plDmgText.update(null, ev);
     }
 
 
@@ -67,6 +71,8 @@ class ObjectManager {
 
         // "Post"-draw objects
         this.bullets.postDraw(c);
+
+        this.plDmgText.draw(c);
 
         // Clear the render buffer array
         // TODO: Check if there is a better, faster and/or more

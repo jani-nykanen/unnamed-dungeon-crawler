@@ -151,9 +151,9 @@ class Stage {
 
         let pos = this.waterPos | 0;
 
-        for (let y = -1; y < ROOM_HEIGHT+1; ++ y) {
+        for (let y = -1; y < ROOM_HEIGHT+2; ++ y) {
 
-            for (let x = -1; x < ROOM_WIDTH+1; ++ x) {
+            for (let x = -1; x < ROOM_WIDTH+2; ++ x) {
 
                 c.drawBitmapRegion(bmp, 
                     48 + this.sprWater.getColumn()*16, 96, 
@@ -256,17 +256,36 @@ class Stage {
     }
 
 
+    private handleWaterHurtCollision(o : CollisionObject, id : number,
+        x : number, y : number, ev : GameEvent) {
+
+        const BASE_HURT_DAMAGE = 2;
+        const START_X = [4, 0, 0, 4, 0, 0, 4, 0, 0, 0, 4];
+        const START_Y = [4, 4, 4, 0, 0, 0, 0, 0, 0, 4, 0];
+        const WIDTH = [12, 16, 12, 12, 16, 12, 12, 16, 12, 16, 12];
+        const HEIGHT = [12, 12, 12, 16, 16, 16, 12, 12, 12, 12, 16];
+
+        o.hurtCollision(x*16 + START_X[id], y*16 + START_Y[id],
+            WIDTH[id], HEIGHT[id], BASE_HURT_DAMAGE, null, ev);
+
+    }
+
+
     private handleSpecialTileCollision(o : CollisionObject, 
         x : number, y : number, 
         colId : number, tid : number, ev : GameEvent) {
             
         const BUSH_OFFSET = 4;
-        // TODO: This makes it possible to 
-        // walk on water...
-        const HURT_OFFSET = 4;
-        const WATER_DMG = 2;
 
         let t = colId - 16;
+
+        // Water hurt collisions
+        if (t >= 16 && t < 32) {
+
+            this.handleWaterHurtCollision(o, t - 16, x, y, ev);
+            return;
+        }
+
         switch (t) {
 
         // Bush or rock
@@ -287,14 +306,6 @@ class Stage {
                 // "Box collision"
                 this.handeTileCollision(o, x, y, 14, ev);
             }
-            break;
-
-        // "Hurt"
-        case 2:
-
-            o.hurtCollision(x*16 + HURT_OFFSET, y*16 + HURT_OFFSET,
-                    16 - HURT_OFFSET*2, 16 - HURT_OFFSET*2, WATER_DMG, ev);
-
             break;
 
         default:

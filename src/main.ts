@@ -31,6 +31,7 @@ let loadAssets = (core : Core) => {
         {name: "shadow", path: "assets/bitmaps/shadow.png"},
         {name: "bullet", path: "assets/bitmaps/bullets.png"},
         {name: "leaves", path: "assets/bitmaps/leaves.png"},
+        {name: "fontSmall", path: "assets/bitmaps/font_small.png"},
         {name: "hud", path: "assets/bitmaps/hud.png"}
     ].map(a => core.loadBitmap(a.name, a.path));
 
