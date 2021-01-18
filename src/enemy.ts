@@ -16,6 +16,8 @@ abstract class Enemy extends CollisionObject {
     protected radius : number;
     protected damage : number;
 
+    protected damageBox : Vector2;
+
     
     constructor(x : number, y : number, row : number) {
 
@@ -24,8 +26,8 @@ abstract class Enemy extends CollisionObject {
         this.spr = new Sprite(16, 16);
         this.spr.setFrame(0, row);
 
-        this.swordHitId = -1;
-        this.magicHitId = -1;
+        this.swordHitId = -2;
+        this.magicHitId = -2;
 
         this.flip = Flip.None;
         this.shadowType = 0;
@@ -36,6 +38,8 @@ abstract class Enemy extends CollisionObject {
         this.damage = 1;
 
         this.avoidWater = true;
+
+        this.damageBox = new Vector2(this.spr.width, this.spr.height);
     }
 
 
@@ -47,6 +51,16 @@ abstract class Enemy extends CollisionObject {
 
     protected updateAI(ev : GameEvent) {}
     protected playerEvent(pl : Player, ev : GameEvent) {}
+
+
+    protected die(ev : GameEvent) : boolean {
+
+        const DEATH_SPEED = 6.0;
+
+        this.spr.animate(0, 0, 4, DEATH_SPEED, ev.step);
+
+        return this.spr.getColumn() == 4;
+    }
 
 
     protected updateLogic(ev : GameEvent) {
@@ -83,10 +97,20 @@ abstract class Enemy extends CollisionObject {
     }
 
 
+    private kill(ev : GameEvent) {
+
+        this.dying = true;
+        this.flip = Flip.None;
+    }
+
+
     public playerCollision(pl : Player, ev : GameEvent) : boolean {
 
         if (!this.isActive()) 
             return false;
+
+        let cx = this.pos.x;
+        let cy = this.pos.y - this.spr.height/2 + 1;
 
         this.playerEvent(pl, ev);
 
@@ -98,6 +122,59 @@ abstract class Enemy extends CollisionObject {
             (new Vector2(this.pos.x - pl.getPos().x, 
                 this.pos.y - pl.getPos().y)).normalize(),
             ev);
+
+        // Sword
+        if (pl.getSwordHitId() > this.swordHitId &&
+            pl.attackCollisionCheck(
+                cx - this.damageBox.x/2,
+                cy - this.damageBox.y/2,
+                this.damageBox.x, this.damageBox.y)) {
+
+            ++ this.swordHitId;
+
+            // TODO: Reduce damage first
+            this.kill(ev);
+
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public bombCollision(b : Bomb, ev : GameEvent) : boolean {
+
+        if (!this.isActive() || !b.doesExist()) 
+            return false;
+
+        let cx = this.pos.x;
+        let cy = this.pos.y - this.spr.height/2 + 1;
+
+        // Collision with the bomb
+        if (!b.isDying() &&
+            boxOverlay(b.getPos(), new Vector2(), b.getHitbox(),
+            cx - this.damageBox.x/2,
+            cy - this.damageBox.y/2,
+            this.damageBox.x, this.damageBox.y)) {
+
+            b.kill(ev);
+        }
+
+        // Collision with the explosion
+        if (b.isDying() && b.doesIgnoreDeathOnCollision() &&
+            b.getHitID() > this.magicHitId &&
+            b.attackCollisionCheck(
+                cx - this.damageBox.x/2,
+                cy - this.damageBox.y/2,
+                this.damageBox.x, this.damageBox.y)) {
+
+            ++ this.magicHitId;
+
+            // TODO: Reduce damage first
+            this.kill(ev);
+
+            return true;
+        }
 
         return false;
     }

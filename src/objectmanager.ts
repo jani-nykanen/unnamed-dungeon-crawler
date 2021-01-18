@@ -9,7 +9,7 @@ class ObjectManager {
 
 
     private player : Player;
-    private bullets : ObjectGenerator<Bullet>;
+    private bombs : ObjectGenerator<Bomb>;
     private plDmgText : ObjectGenerator<PlayerDamageText>;
     private enemies : EnemyContainer;
 
@@ -18,9 +18,9 @@ class ObjectManager {
 
     constructor(status : PlayerStatus) {
 
-        this.bullets = new ObjectGenerator<Bullet> (Bullet);
+        this.bombs = new ObjectGenerator<Bomb> (Bomb);
         this.plDmgText = new ObjectGenerator<PlayerDamageText> (PlayerDamageText);
-        this.player = new Player(80, 72, this.bullets, this.plDmgText, status);
+        this.player = new Player(80, 72, this.bombs, this.plDmgText, status);
         
         this.enemies = new EnemyContainer(getEnemyList());
 
@@ -53,10 +53,10 @@ class ObjectManager {
         this.player.cameraEvent(cam);
         stage.objectCollisions(this.player, ev);
 
-        this.bullets.update(cam, ev);
-        this.bullets.stageCollisions(stage, ev);
+        this.bombs.update(cam, ev);
+        this.bombs.stageCollisions(stage, ev);
 
-        this.enemies.update(cam, stage, this.player, ev);
+        this.enemies.update(cam, stage, this.player, this.bombs, ev);
 
         this.plDmgText.update(null, ev);
     }
@@ -67,7 +67,7 @@ class ObjectManager {
 
         // Push object to the array
         this.objectRenderBuffer.push(this.player);
-        this.bullets.pushObjectsToArray(this.objectRenderBuffer);
+        this.bombs.pushObjectsToArray(this.objectRenderBuffer);
         this.enemies.pushObjectsToArray(this.objectRenderBuffer);
         stage.pushLeavesToDrawBuffer(this.objectRenderBuffer);
 
@@ -83,7 +83,7 @@ class ObjectManager {
         }
 
         // Draw things that overlay other objects
-        this.bullets.postDraw(c);
+        this.bombs.postDraw(c);
         this.plDmgText.draw(c);
 
         // Clear the render buffer array

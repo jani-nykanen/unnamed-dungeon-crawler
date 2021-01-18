@@ -34,7 +34,8 @@ class EnemyContainer {
     }
 
 
-    public update(cam : Camera, stage : Stage, pl : Player, ev : GameEvent) {
+    public update(cam : Camera, stage : Stage, pl : Player, 
+        bombs : ObjectGenerator<Bomb>, ev : GameEvent) {
 
         for (let o of this.objects) {
 
@@ -55,6 +56,8 @@ class EnemyContainer {
 
                     o.enemyToEnemyCollision(e);
                 }
+
+                bombs.applyBooleanEvent((a : any, ev : GameEvent) => o.bombCollision(a, ev), ev);
             }
         }
     }

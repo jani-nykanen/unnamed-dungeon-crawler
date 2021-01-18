@@ -17,7 +17,9 @@ class Player extends CollisionObject {
     private sprSword : Sprite;
     private attacking : boolean;
     private swordHitbox : Rect;
-    private swordHitId : number; 
+    private swordHitId : number;
+     
+    private magicHitId : number;
     private usingMagic : boolean;
 
     private spinAttackTimer : number;
@@ -29,13 +31,13 @@ class Player extends CollisionObject {
     private knockbackTimer : number;
     private hurtTimer : number;
 
-    private readonly bullets : ObjectGenerator<Bullet>;
+    private readonly bombs : ObjectGenerator<Bomb>;
     private readonly status : PlayerStatus;
     private readonly dmgText : ObjectGenerator<PlayerDamageText>;
 
 
     constructor(x : number, y : number, 
-        bullets : ObjectGenerator<Bullet>,
+        bombs : ObjectGenerator<Bomb>,
         dmgText : ObjectGenerator<PlayerDamageText>,
         status : PlayerStatus) {
 
@@ -63,7 +65,7 @@ class Player extends CollisionObject {
         this.spinning = false;
         this.spinStartFrameReached = false;
 
-        this.bullets = bullets;
+        this.bombs = bombs;
         this.status = status;
         this.dmgText = dmgText;
 
@@ -71,6 +73,7 @@ class Player extends CollisionObject {
         this.collisionBox = new Vector2(8, 4);
 
         this.swordHitId = -1;
+        this.magicHitId = -1;
         this.swordHitbox = new Rect();
 
         this.knockbackTimer = 0;
@@ -187,7 +190,7 @@ class Player extends CollisionObject {
 
             this.usingMagic = true;
 
-            this.bullets.spawn(0,
+            this.bombs.spawn(this.magicHitId ++,
                 this.pos.x + XOFF[this.faceColumn], 
                 this.pos.y + YOFF[this.faceColumn],
                 DIR_X[this.faceColumn] * MAGIC_SPEED, 

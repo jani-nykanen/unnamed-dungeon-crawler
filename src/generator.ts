@@ -63,6 +63,19 @@ class ObjectGenerator<T extends CollisionObject> {
     }
 
 
+    // TODO: Get rid of any
+    public applyBooleanEvent(f : (self : any, ev : GameEvent) => boolean, 
+        ev : GameEvent) : boolean {
+
+        let ret = false;
+        for (let o of this.objects) {
+
+            ret = ret || f(o, ev);
+        }
+        return ret;
+    }
+
+
     public draw(c : Canvas) {
 
         for (let o of this.objects) {

@@ -291,5 +291,7 @@ abstract class CollisionObject extends SpawnableObject {
 
     public doesIgnoreDeathOnCollision = () : boolean => this.ignoreDeathOnCollision;
     public doesAvoidWater = () : boolean => this.avoidWater;
+
+    public getHitbox = () : Vector2 => this.hitbox.clone();
 }
 

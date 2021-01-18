@@ -5,11 +5,9 @@
  */
 
 
-class Bullet extends CollisionObject {
+class Bomb extends CollisionObject {
 
-
-    private friendly : boolean;
-    private id : number;
+    private hitId : number;
 
 
     constructor() {
@@ -17,8 +15,7 @@ class Bullet extends CollisionObject {
         super(0, 0);
 
         this.exist = false;
-        this.id = 0;
-        this.friendly = false;
+        this.hitId = -1;
         this.collisionBox = new Vector2(4, 4);
         this.hitbox = this.collisionBox.clone();
 
@@ -37,7 +34,7 @@ class Bullet extends CollisionObject {
 
         const DEATH_SPEED = 4;
 
-        this.spr.animate(this.id, 4, 8, DEATH_SPEED, ev.step);
+        this.spr.animate(0, 4, 8, DEATH_SPEED, ev.step);
 
         return this.spr.getColumn() == 8;
     }
@@ -47,11 +44,17 @@ class Bullet extends CollisionObject {
 
         const ANIM_SPEED = 3;
 
-        this.spr.animate(this.id, 0, 3, ANIM_SPEED, ev.step);
+        this.spr.animate(0, 0, 3, ANIM_SPEED, ev.step);
     }
 
 
     protected wallCollisionEvent(dirx : number, diry : number, ev : GameEvent) {
+
+        this.kill(ev);
+    }
+
+
+    public kill(ev : GameEvent) {
 
         this.stopMovement();
         this.dying = true;
@@ -67,10 +70,9 @@ class Bullet extends CollisionObject {
         this.speed = new Vector2(speedx, speedy);
         this.target = this.speed.clone();
 
-        this.spr.setFrame(0, this.id);
+        this.spr.setFrame(0, 0);
 
-        this.id = id;
-        this.friendly = id == 0;
+        this.hitId = id;
 
         this.exist = true;
         this.ignoreDeathOnCollision = false;
@@ -113,7 +115,7 @@ class Bullet extends CollisionObject {
     }
 
 
-    public isFriendly = () => this.friendly;
+    public getHitID = () : number => this.hitId;
 
 
     public attackCollisionCheck(x : number, y : number, 

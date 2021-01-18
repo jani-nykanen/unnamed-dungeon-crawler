@@ -30,6 +30,7 @@ class Slime extends Enemy {
 
         this.hitbox = new Vector2(6, 4);
         this.collisionBox = this.hitbox.clone();
+        this.damageBox = new Vector2(10, 10);
     }
 
 
