@@ -62,7 +62,9 @@ abstract class FlyingText extends CollisionObject {
     }
 
 
-    public spawn(id : number, x : number, y : number, sx : number, sy : number) {
+    public spawn(id : number, x : number, y : number, 
+        sx : number, sy : number,
+        source : Vector2 = null) {
 
         this.setText(id);
 

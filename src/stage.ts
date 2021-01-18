@@ -42,6 +42,7 @@ class Stage {
     
     private baseLayer : Array<number>;
     private collisionMap : Tilemap;
+    private preservedTiles : Array<boolean>;
 
     private rooms : Array<Room>;
     private leaves : ObjectGenerator<Leaf>;
@@ -98,6 +99,40 @@ class Stage {
         this.leaves = new ObjectGenerator<Leaf> (Leaf);
         this.sprWater = new Sprite(16, 16);
         this.waterPos = 0;
+
+        this.computePreservedTiles();
+    }
+
+
+    private isTileFree(x : number, y : number) : boolean {
+
+        let noCollision = this.getTile(x, y) <= 0 ||
+            this.collisionMap.getIndexedTile(0, this.getTile(x, y)-1) <= 0;
+
+        let modx = x % ROOM_WIDTH;
+        let mody = y % ROOM_HEIGHT;
+
+        let noDoor = 
+            // Vertical doors
+            !(modx >= 4 && modx <= 5 && (mody < 2 || mody >= ROOM_HEIGHT-2)) &&
+            // Horizontal doors
+            !(mody >= 3 && mody <= 4 && (modx < 2 || modx >= ROOM_WIDTH-2));
+
+        return noCollision && noDoor;
+    }
+
+
+    private computePreservedTiles() {
+
+        this.preservedTiles = new Array<boolean> (this.width * this.height);
+
+        for (let y = 0; y < this.height; ++ y) {
+
+            for (let x = 0; x < this.width; ++ x) {
+
+                this.preservedTiles[y * this.width + x] = !this.isTileFree(x, y);
+            }
+        }
     }
 
 
@@ -271,8 +306,16 @@ class Stage {
         const WIDTH = [12, 16, 12, 12, 16, 12, 12, 16, 12, 16, 12];
         const HEIGHT = [12, 12, 12, 16, 16, 16, 12, 12, 12, 12, 16];
 
-        o.hurtCollision(x*16 + START_X[id], y*16 + START_Y[id],
-            WIDTH[id], HEIGHT[id], BASE_HURT_DAMAGE, null, ev);
+        if (o.doesAvoidWater()) {
+
+            o.boxCollision(x*16 + START_X[id], y*16 + START_Y[id],
+                WIDTH[id], HEIGHT[id], ev);
+        }
+        else {
+
+            o.hurtCollision(x*16 + START_X[id], y*16 + START_Y[id],
+                WIDTH[id], HEIGHT[id], BASE_HURT_DAMAGE, null, ev);
+        }
 
     }
 
@@ -362,24 +405,6 @@ class Stage {
     }
 
 
-    private isTileFree(x : number, y : number) : boolean {
-
-        let noCollision = this.getTile(x, y) <= 0 ||
-            this.collisionMap.getIndexedTile(0, this.getTile(x, y)-1) <= 0;
-
-        let modx = x % ROOM_WIDTH;
-        let mody = y % ROOM_HEIGHT;
-
-        let noDoor = 
-            // Vertical doors
-            !(modx >= 4 && modx <= 5 && (mody < 2 || mody >= ROOM_HEIGHT-2)) &&
-            // Horizontal doors
-            !(mody >= 3 && mody <= 4 && (modx < 2 || modx >= ROOM_WIDTH-2));
-
-        return noCollision && noDoor;
-    }
-
-
     private genEnemiesToSingleRoom(enemies : EnemyContainer,
         dx : number, dy : number, 
         minCount : number, maxCount : number) {
@@ -391,7 +416,7 @@ class Stage {
 
         let px, py : number;
         let startx, starty : number;
-        let count = minCount + ((Math.random() * (maxCount - minCount)) | 0);
+        let count = minCount + ((Math.random() * ( (maxCount+1) - minCount)) | 0);
 
         for (let i = 0; i < count; ++ i) {
 
@@ -404,7 +429,7 @@ class Stage {
             do {
 
                 // If reserved, move to the next tile
-                if (!this.isTileFree(px, py)) {
+                if (this.preservedTiles[py * this.width + px]) {
 
                     ++ px;
                     if (px >= leftx + w) {
@@ -417,6 +442,7 @@ class Stage {
                     continue;
                 }
                 enemies.spawnEnemy(0, px * 16 + 8, py * 16 + 8);
+                this.preservedTiles[py * this.width + px] = true;
                 break;
             }
             while(px != startx || py != starty);

@@ -13,6 +13,8 @@ abstract class Enemy extends CollisionObject {
 
     protected flip : Flip;
     protected shadowType : number;
+    protected radius : number;
+    protected damage : number;
 
     
     constructor(x : number, y : number, row : number) {
@@ -29,6 +31,11 @@ abstract class Enemy extends CollisionObject {
         this.shadowType = 0;
 
         this.friction = new Vector2(0.1, 0.1);
+
+        this.radius = 6;
+        this.damage = 1;
+
+        this.avoidWater = true;
     }
 
 
@@ -83,9 +90,42 @@ abstract class Enemy extends CollisionObject {
 
         this.playerEvent(pl, ev);
 
-        // TODO 1: Sword collision
-        // TODO 2: Player collision (if no sword collision)
+        pl.hurtCollision(
+            this.pos.x - this.hitbox.x/2, 
+            this.pos.y - this.hitbox.y/2,
+            this.hitbox.x, this.hitbox.y,
+            this.damage,
+            (new Vector2(this.pos.x - pl.getPos().x, 
+                this.pos.y - pl.getPos().y)).normalize(),
+            ev);
 
+        return false;
+    }
+
+
+    public enemyToEnemyCollision(e : Enemy) : boolean {
+
+        if (!e.doesExist() || !this.exist || 
+            !e.isInCamera() || !this.isInCamera ||
+            e.isDying() || this.dying)
+            return false;
+
+        let dir : Vector2;
+        let dist = Vector2.distance(this.pos, e.pos);
+        if (dist < this.radius + e.radius) {
+
+            dist = this.radius + e.radius - dist;
+
+            dir = Vector2.normalize(new Vector2(this.pos.x - e.pos.x, this.pos.y - e.pos.y));
+
+            this.pos.x += dir.x * dist / 2;
+            this.pos.y += dir.y * dist / 2;
+
+            e.pos.x -= dir.x * dist / 2;
+            e.pos.y -= dir.y * dist / 2;
+
+            return true;
+        }
         return false;
     }
 

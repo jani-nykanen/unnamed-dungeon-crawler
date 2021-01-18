@@ -68,7 +68,7 @@ class Player extends CollisionObject {
         this.dmgText = dmgText;
 
         this.hitbox = new Vector2(8, 6);
-        this.collisionBox = new Vector2(6, 4);
+        this.collisionBox = new Vector2(8, 4);
 
         this.swordHitId = -1;
         this.swordHitbox = new Rect();
@@ -191,7 +191,8 @@ class Player extends CollisionObject {
                 this.pos.x + XOFF[this.faceColumn], 
                 this.pos.y + YOFF[this.faceColumn],
                 DIR_X[this.faceColumn] * MAGIC_SPEED, 
-                DIR_Y[this.faceColumn] * MAGIC_SPEED);
+                DIR_Y[this.faceColumn] * MAGIC_SPEED,
+                this.pos);
 
             return true;
         }
@@ -482,7 +483,10 @@ class Player extends CollisionObject {
         // Knockback
         if (this.knockbackTimer > 0) {
 
-            this.knockbackTimer -= ev.step;
+            if ((this.knockbackTimer -= ev.step) <= 0) {
+
+                this.spr.setFrame(0, this.spr.getColumn());
+            }
         }
         // Hurt
         if (this.hurtTimer > 0) {   
@@ -615,6 +619,7 @@ class Player extends CollisionObject {
 
         // Flicker if hurt
         if (this.hurtTimer > 0 && 
+            this.knockbackTimer <= 0 &&
             Math.round(this.hurtTimer / 4) % 2 != 0)
             return;
 

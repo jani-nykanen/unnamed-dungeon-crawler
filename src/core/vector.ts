@@ -83,6 +83,12 @@ class Vector2 {
 
 		return new Vector2(v.x * s, v.y * s);
 	}
+
+
+	static distance(a : Vector2, b : Vector2) : number {
+
+		return Math.hypot(a.x - b.x, a.y - b.y);
+	}
 }
 
 

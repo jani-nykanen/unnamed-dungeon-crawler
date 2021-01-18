@@ -60,7 +60,8 @@ class Bullet extends CollisionObject {
 
 
     public spawn(id : number, x : number, y : number,
-            speedx : number, speedy : number) {
+            speedx : number, speedy : number,
+            source : Vector2 = null) {
 
         this.pos = new Vector2(x, y);
         this.speed = new Vector2(speedx, speedy);
@@ -73,6 +74,15 @@ class Bullet extends CollisionObject {
 
         this.exist = true;
         this.ignoreDeathOnCollision = false;
+
+        if (source != null) {
+
+            this.oldPos = source.clone();
+        }
+        else {
+
+            this.oldPos = this.pos.clone();
+        }
     }
 
 

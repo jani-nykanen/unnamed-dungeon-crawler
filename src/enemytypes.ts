@@ -25,6 +25,11 @@ class Slime extends Enemy {
 
         this.friction = new Vector2(0.0125, 0.0125);
         this.dir = new Vector2(0, 1);
+
+        this.radius = 4;
+
+        this.hitbox = new Vector2(6, 4);
+        this.collisionBox = this.hitbox.clone();
     }
 
 

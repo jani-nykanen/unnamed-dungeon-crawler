@@ -48,6 +48,14 @@ class EnemyContainer {
             stage.objectCollisions(o, ev);
             o.playerCollision(pl, ev);
             o.update(ev);
+
+            if (!o.isDying()) {
+                
+                for (let e of this.objects) {
+
+                    o.enemyToEnemyCollision(e);
+                }
+            }
         }
     }
 

@@ -20,7 +20,8 @@ class ObjectGenerator<T extends CollisionObject> {
 
 
     public spawn(id : number,
-        x : number, y : number, sx : number, sy : number) {
+        x : number, y : number, sx : number, sy : number,
+        source : Vector2 = null) {
 
         let o = null;
         for (let e of this.objects) {
@@ -37,7 +38,7 @@ class ObjectGenerator<T extends CollisionObject> {
             o = this.objects[this.objects.length-1];
         }
 
-        o.spawn(id, x, y, sx, sy);
+        o.spawn(id, x, y, sx, sy, source);
     }
 
 

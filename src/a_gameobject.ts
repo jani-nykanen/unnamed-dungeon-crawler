@@ -148,7 +148,8 @@ abstract class GameObject extends ExistingObject {
 abstract class SpawnableObject extends GameObject {
 
     public spawn(id : number, x : number, y : number, 
-        speedx : number, speedy : number) {}
+        speedx : number, speedy : number, 
+        source : Vector2 = null) {}
 }
 
 
@@ -159,6 +160,7 @@ abstract class CollisionObject extends SpawnableObject {
     protected collisionBox : Vector2;
     protected bounceFactor : number;
     protected ignoreDeathOnCollision : boolean;
+    protected avoidWater : boolean;
 
 
     constructor(x : number, y : number) {
@@ -169,6 +171,7 @@ abstract class CollisionObject extends SpawnableObject {
         this.bounceFactor = 0;
 
         this.ignoreDeathOnCollision = false;
+        this.avoidWater = false;
     }
 
 
@@ -182,7 +185,7 @@ abstract class CollisionObject extends SpawnableObject {
         const EPS = 0.001;
         const V_MARGIN = 1;
         const NEAR_MARGIN = 1;
-        const FAR_MARGIN = 2;
+        const FAR_MARGIN = 6;
         
         if (!this.inCamera ||
             //(!force && this.disableCollisions) ||
@@ -224,7 +227,7 @@ abstract class CollisionObject extends SpawnableObject {
         const EPS = 0.001;
         const H_MARGIN = 1;
         const NEAR_MARGIN = 1;
-        const FAR_MARGIN = 2;
+        const FAR_MARGIN = 6;
         
         if (!this.inCamera ||
             //(!force && this.disableCollisions) ||
@@ -273,6 +276,20 @@ abstract class CollisionObject extends SpawnableObject {
     }
 
 
+    public boxCollision(x : number, y : number, 
+        w : number, h : number, ev : GameEvent)  : boolean{
+
+        let ret = false;
+        ret = ret || this.verticalCollision(x, y, w, 1, ev);
+        ret = ret || this.verticalCollision(x, y+h, w, -1, ev);
+        ret = ret || this.horizontalCollision(x, y, w, 1, ev);
+        ret = ret || this.horizontalCollision(x+w, y, w, -1, ev);
+
+        return ret;
+    }
+
+
     public doesIgnoreDeathOnCollision = () : boolean => this.ignoreDeathOnCollision;
+    public doesAvoidWater = () : boolean => this.avoidWater;
 }
 
