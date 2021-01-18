@@ -11,7 +11,8 @@ abstract class Enemy extends CollisionObject {
     private swordHitId : number;
     private magicHitId : number;
 
-    private flip : Flip;
+    protected flip : Flip;
+    protected shadowType : number;
 
     
     constructor(x : number, y : number, row : number) {
@@ -25,6 +26,9 @@ abstract class Enemy extends CollisionObject {
         this.magicHitId = -1;
 
         this.flip = Flip.None;
+        this.shadowType = 0;
+
+        this.friction = new Vector2(0.1, 0.1);
     }
 
 
@@ -51,11 +55,21 @@ abstract class Enemy extends CollisionObject {
         if (!this.exist || !this.inCamera)
             return;
 
+        let shadow = c.getBitmap("shadow");
+
         let px = Math.round(this.pos.x);
         let py = Math.round(this.pos.y);
 
-        let xoff = (this.center.x + this.spr.width/2);
-        let yoff = (this.center.y + this.spr.height/2);
+        // Shadow
+        c.setGlobalAlpha(0.67);
+        c.drawBitmapRegion(shadow, 
+            this.shadowType*16, 0, 16, 8,
+            px - shadow.width/4, 
+            py - shadow.height/2);
+        c.setGlobalAlpha();
+
+        let xoff = this.spr.width/2;
+        let yoff = 7 + this.spr.height/2;
 
         c.drawSprite(this.spr, c.getBitmap("enemies"),
             px - xoff, py - yoff, this.flip);

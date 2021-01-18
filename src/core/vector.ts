@@ -77,6 +77,12 @@ class Vector2 {
 
 		return v.clone().normalize(forceUnit);
 	}
+
+
+	static scalarMultiply(v : Vector2, s : number) : Vector2 {
+
+		return new Vector2(v.x * s, v.y * s);
+	}
 }
 
 

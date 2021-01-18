@@ -45,6 +45,7 @@ class EnemyContainer {
             if (!o.isInCamera())
                 continue;
 
+            stage.objectCollisions(o, ev);
             o.playerCollision(pl, ev);
             o.update(ev);
         }

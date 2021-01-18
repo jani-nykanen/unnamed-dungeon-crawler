@@ -320,7 +320,7 @@ class Stage {
     }
 
 
-    public objectCollisions(o : CollisionObject, cam : Camera, ev : GameEvent) {
+    public objectCollisions(o : CollisionObject, ev : GameEvent) {
 
         const RADIUS = 2;
 

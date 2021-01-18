@@ -53,11 +53,11 @@ class ObjectGenerator<T extends CollisionObject> {
     }
 
 
-    public stageCollisions(stage : Stage, cam : Camera, ev : GameEvent) {
+    public stageCollisions(stage : Stage, ev : GameEvent) {
 
         for (let o of this.objects) {
 
-            stage.objectCollisions(o, cam, ev);
+            stage.objectCollisions(o, ev);
         }
     }
 

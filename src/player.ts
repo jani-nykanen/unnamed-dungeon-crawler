@@ -630,7 +630,8 @@ class Player extends CollisionObject {
 
         // Base sprite
         let column = this.spr.getColumn();
-        if (this.readyingSpinAttack && Math.floor(this.spinAttackTimer / 4) % 2 == 0) {
+        if (this.readyingSpinAttack && 
+            Math.floor(this.spinAttackTimer / 4) % 2 == 0) {
 
             column += 6;
         }
