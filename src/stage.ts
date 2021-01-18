@@ -49,23 +49,29 @@ class Stage {
     private sprWater : Sprite;
     private waterPos : number;
 
+    private roomCountX : number;
+    private roomCountY : number;
+    private startPos : Vector2;
+
 
     constructor(roomCountX : number, roomCountY : number, cam : Camera, ev : GameEvent) {
 
         this.collisionMap = ev.getTilemap("collisions");
 
-        // Construct a base room
-        // (temp stage size)
         this.width = ROOM_WIDTH * roomCountX;
         this.height = ROOM_HEIGHT * roomCountY;
+
+        this.roomCountX = roomCountX;
+        this.roomCountY = roomCountY;
+
         this.baseLayer = new Array<number> (this.width * this.height);
 
         let baseRoom = ev.getTilemap("baseRoom");
         let roomMap = new RoomMap(roomCountX, roomCountY);
         this.rooms = roomMap.cloneRoomArray();
 
-        let startPos = roomMap.getStartPos();
-        cam.setPos(startPos.x, startPos.y);
+        this.startPos = roomMap.getStartPos();
+        cam.setPos(this.startPos.x, this.startPos.y);
         
         let wallData : Tilemap;
         let roomData : Tilemap;
@@ -73,7 +79,7 @@ class Stage {
 
             for (let x = 0; x < roomCountX; ++ x) {
 
-                if (x == startPos.x && y == startPos.y) {
+                if (x == this.startPos.x && y == this.startPos.y) {
                     
                     roomData = ev.getTilemap("startRoom");
                     wallData = roomData;
@@ -353,5 +359,90 @@ class Stage {
         o.horizontalCollision(topLeft.x, topLeft.y, 128, -1, ev);
         o.horizontalCollision(topLeft.x + 160, topLeft.y, 128, 1, ev);
         */
+    }
+
+
+    private isTileFree(x : number, y : number) : boolean {
+
+        let noCollision = this.getTile(x, y) <= 0 ||
+            this.collisionMap.getIndexedTile(0, this.getTile(x, y)-1) <= 0;
+
+        let modx = x % ROOM_WIDTH;
+        let mody = y % ROOM_HEIGHT;
+
+        let noDoor = 
+            // Vertical doors
+            !(modx >= 4 && modx <= 5 && (mody < 2 || mody >= ROOM_HEIGHT-2)) &&
+            // Horizontal doors
+            !(mody >= 3 && mody <= 4 && (modx < 2 || modx >= ROOM_WIDTH-2));
+
+        return noCollision && noDoor;
+    }
+
+
+    private genEnemiesToSingleRoom(enemies : EnemyContainer,
+        dx : number, dy : number, 
+        minCount : number, maxCount : number) {
+
+        let leftx = dx * ROOM_WIDTH + 1;
+        let topy = dy * ROOM_HEIGHT + 1;
+        let w = ROOM_WIDTH - 2;
+        let h = ROOM_HEIGHT - 2;
+
+        let px, py : number;
+        let startx, starty : number;
+        let count = minCount + ((Math.random() * (maxCount - minCount)) | 0);
+
+        for (let i = 0; i < count; ++ i) {
+
+            startx = leftx + ((Math.random() * w) | 0);
+            starty = topy + ((Math.random() * h) | 0);
+
+            px = startx;
+            py = starty;
+
+            do {
+
+                // If reserved, move to the next tile
+                if (!this.isTileFree(px, py)) {
+
+                    ++ px;
+                    if (px >= leftx + w) {
+
+                        px = leftx;
+                        ++ py;
+                        if (py >= topy + h)
+                            py = topy;
+                    }
+                    continue;
+                }
+                enemies.spawnEnemy(0, px * 16 + 8, py * 16 + 8);
+                break;
+            }
+            while(px != startx || py != starty);
+        }
+    }
+
+
+    public generateEnemies(enemies : EnemyContainer) {
+
+        // TEMP
+        const MIN_ENEMY_COUNT = 1;
+        const MAX_ENEMY_COUNT = 3;
+
+        for (let y = 0; y < this.roomCountY; ++ y) {
+
+            for (let x = 0; x < this.roomCountX; ++ x) {
+
+                if (x == this.startPos.x && 
+                    y == this.startPos.y)
+                    continue;
+                
+                this.genEnemiesToSingleRoom(enemies, x, y,
+                    MIN_ENEMY_COUNT,
+                    MAX_ENEMY_COUNT);
+            }
+        }
+
     }
 }

@@ -11,6 +11,7 @@ class ObjectManager {
     private player : Player;
     private bullets : ObjectGenerator<Bullet>;
     private plDmgText : ObjectGenerator<PlayerDamageText>;
+    private enemies : EnemyContainer;
 
     private objectRenderBuffer : Array<GameObject>;
 
@@ -20,8 +21,16 @@ class ObjectManager {
         this.bullets = new ObjectGenerator<Bullet> (Bullet);
         this.plDmgText = new ObjectGenerator<PlayerDamageText> (PlayerDamageText);
         this.player = new Player(80, 72, this.bullets, this.plDmgText, status);
+        
+        this.enemies = new EnemyContainer(getEnemyList());
 
         this.objectRenderBuffer = new Array<GameObject> ();
+    }
+
+
+    public generateObjects(stage : Stage) {
+
+        stage.generateEnemies(this.enemies);
     }
 
 
@@ -33,6 +42,7 @@ class ObjectManager {
 
     public cameraMovement(cam : Camera, ev : GameEvent) {
 
+        this.enemies.initialCameraCheck(cam);
         this.player.cameraMovement(cam, ev);
     }
 
@@ -46,6 +56,8 @@ class ObjectManager {
         this.bullets.update(cam, ev);
         this.bullets.stageCollisions(stage, cam, ev);
 
+        this.enemies.update(cam, stage, this.player, ev);
+
         this.plDmgText.update(null, ev);
     }
 
@@ -56,6 +68,7 @@ class ObjectManager {
         // Push object to the array
         this.objectRenderBuffer.push(this.player);
         this.bullets.pushObjectsToArray(this.objectRenderBuffer);
+        this.enemies.pushObjectsToArray(this.objectRenderBuffer);
         stage.pushLeavesToDrawBuffer(this.objectRenderBuffer);
 
         // NOTE: getCoordY should be faster than getPos().y, because no cloning
@@ -69,9 +82,8 @@ class ObjectManager {
             o.draw(c);
         }
 
-        // "Post"-draw objects
+        // Draw things that overlay other objects
         this.bullets.postDraw(c);
-
         this.plDmgText.draw(c);
 
         // Clear the render buffer array

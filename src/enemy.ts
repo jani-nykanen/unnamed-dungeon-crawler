@@ -8,19 +8,18 @@
 abstract class Enemy extends CollisionObject {
 
 
-    private id : number;
     private swordHitId : number;
     private magicHitId : number;
 
     private flip : Flip;
 
     
-    constructor(x : number, y : number, id : number) {
+    constructor(x : number, y : number, row : number) {
 
         super(x, y);
 
         this.spr = new Sprite(16, 16);
-        this.id = id;
+        this.spr.setFrame(0, row);
 
         this.swordHitId = -1;
         this.magicHitId = -1;
@@ -58,7 +57,7 @@ abstract class Enemy extends CollisionObject {
         let xoff = (this.center.x + this.spr.width/2);
         let yoff = (this.center.y + this.spr.height/2);
 
-        c.drawSprite(this.spr, c.getBitmap("enemy"),
+        c.drawSprite(this.spr, c.getBitmap("enemies"),
             px - xoff, py - yoff, this.flip);
     }
 

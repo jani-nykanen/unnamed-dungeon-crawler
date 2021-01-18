@@ -10,7 +10,7 @@
 const ROOM_MAP_COUNT = 6;
 
 
-let setActions = (core : Core) => {
+const setActions = (core : Core) => {
 
     core.addInputAction("fire2", "KeyZ", 2)
         .addInputAction("fire3", "KeyX", 1)
@@ -21,7 +21,7 @@ let setActions = (core : Core) => {
 }
 
 
-let loadAssets = (core : Core) => {
+const loadAssets = (core : Core) => {
 
     // Bitmaps
     [
@@ -32,6 +32,7 @@ let loadAssets = (core : Core) => {
         {name: "bullet", path: "assets/bitmaps/bullets.png"},
         {name: "leaves", path: "assets/bitmaps/leaves.png"},
         {name: "fontSmall", path: "assets/bitmaps/font_small.png"},
+        {name: "enemies", path: "assets/bitmaps/enemies.png"},
         {name: "hud", path: "assets/bitmaps/hud.png"}
     ].map(a => core.loadBitmap(a.name, a.path));
 
@@ -48,7 +49,7 @@ let loadAssets = (core : Core) => {
 }
 
 
-window.onload = () => {
+window.onload = () : void => {
 
     let core = new Core(160, 144, 0);
 

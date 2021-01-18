@@ -25,6 +25,7 @@ class Game implements Scene {
         this.cam = new Camera(0, 0, 160, 128);
         this.stage = new Stage(MAP_WIDTH, MAX_HEIGHT, this.cam, ev);
 
+        this.objects.generateObjects(this.stage);
         this.objects.initialize(this.cam);
     }
 
