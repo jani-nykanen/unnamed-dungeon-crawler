@@ -62,10 +62,27 @@ class FlyingText extends CollisionObject {
     }
 
 
+    // Wait what
+    private translateString(str : string, jump : number) : string {
+
+        let out = "";
+
+        for (let i = 0; i < str.length; ++ i) {
+
+            out += String.fromCharCode(str.charCodeAt(i) + jump);
+        }
+        return out;
+    }
+
+
     public spawn(value : number, x : number, y : number, 
         sx : number, sy : number, color = 0) {
 
         this.message = "-" + String(value);
+        if ((color |= 0) > 0) {
+
+            this.message = this.translateString(this.message, color * 16);
+        }
 
         this.waitTimer = FLYING_TEXT_WAIT_TIME;
         this.moveTimer = FLYING_TEXT_MOVE_TIME;
