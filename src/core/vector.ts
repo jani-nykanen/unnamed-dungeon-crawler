@@ -35,7 +35,7 @@ class Vector2 {
 			this.x = forceUnit ? 1 : 0;
             this.y = 0;
 
-			return this.clone();;
+			return this.clone();
 		}
 		
 		this.x /= l;
@@ -89,6 +89,13 @@ class Vector2 {
 
 		return Math.hypot(a.x - b.x, a.y - b.y);
 	}
+
+
+	static direction(a : Vector2, b : Vector2) : Vector2 {
+		
+		return (new Vector2(b.x - a.x, b.y - a.y)).normalize(true);
+	}
+
 }
 
 

@@ -144,17 +144,7 @@ abstract class GameObject extends ExistingObject {
 }
 
 
-
-abstract class SpawnableObject extends GameObject {
-
-    public spawn(id : number, x : number, y : number, 
-        speedx : number, speedy : number, 
-        source : Vector2 = null) {}
-}
-
-
-
-abstract class CollisionObject extends SpawnableObject {
+abstract class CollisionObject extends GameObject {
 
 
     protected collisionBox : Vector2;

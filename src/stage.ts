@@ -292,7 +292,7 @@ class Stage {
             sx = Math.cos(angle) * speed * H_BONUS;
             sy = Math.sin(angle) * speed + GRAVITY_BONUS;
 
-            this.leaves.spawn(id, x, y, sx, sy);
+            this.leaves.next().spawn(id, x, y, sx, sy);
         }
     }
 
@@ -407,7 +407,8 @@ class Stage {
 
     private genEnemiesToSingleRoom(enemies : EnemyContainer,
         dx : number, dy : number, 
-        minCount : number, maxCount : number) {
+        minCount : number, maxCount : number,
+        flyingText : ObjectGenerator<FlyingText>) {
 
         let leftx = dx * ROOM_WIDTH + 1;
         let topy = dy * ROOM_HEIGHT + 1;
@@ -441,7 +442,7 @@ class Stage {
                     }
                     continue;
                 }
-                enemies.spawnEnemy(0, px * 16 + 8, py * 16 + 8);
+                enemies.spawnEnemy(0, px * 16 + 8, py * 16 + 8, flyingText);
                 this.preservedTiles[py * this.width + px] = true;
                 break;
             }
@@ -450,7 +451,8 @@ class Stage {
     }
 
 
-    public generateEnemies(enemies : EnemyContainer) {
+    public generateEnemies(enemies : EnemyContainer, 
+        flyingText : ObjectGenerator<FlyingText>) {
 
         // TEMP
         const MIN_ENEMY_COUNT = 1;
@@ -466,7 +468,7 @@ class Stage {
                 
                 this.genEnemiesToSingleRoom(enemies, x, y,
                     MIN_ENEMY_COUNT,
-                    MAX_ENEMY_COUNT);
+                    MAX_ENEMY_COUNT, flyingText);
             }
         }
 

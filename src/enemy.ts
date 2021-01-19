@@ -11,15 +11,24 @@ abstract class Enemy extends CollisionObject {
     private swordHitId : number;
     private magicHitId : number;
 
+    private readonly flyingText : ObjectGenerator<FlyingText>;
+
     protected flip : Flip;
     protected shadowType : number;
     protected radius : number;
     protected damage : number;
+    protected mass : number;
+
+    protected health : number;
+    protected maxHealth : number;
 
     protected damageBox : Vector2;
+    protected hurtTimer : number;
 
     
-    constructor(x : number, y : number, row : number) {
+    constructor(x : number, y : number, row : number,
+        health : number,
+        flyingText : ObjectGenerator<FlyingText>) {
 
         super(x, y);
 
@@ -36,10 +45,17 @@ abstract class Enemy extends CollisionObject {
 
         this.radius = 6;
         this.damage = 1;
+        this.mass = 1;
+
+        this.health = health;
+        this.maxHealth = this.health;
 
         this.avoidWater = true;
 
         this.damageBox = new Vector2(this.spr.width, this.spr.height);
+        this.hurtTimer = 0;
+
+        this.flyingText = flyingText;
     }
 
 
@@ -65,7 +81,10 @@ abstract class Enemy extends CollisionObject {
 
     protected updateLogic(ev : GameEvent) {
 
-        if (!this.isActive()) return;
+        // if (!this.isActive()) return;
+
+        if (this.hurtTimer > 0)
+            this.hurtTimer -= ev.step;
 
         this.updateAI(ev);
     }
@@ -89,6 +108,11 @@ abstract class Enemy extends CollisionObject {
             py - shadow.height/2);
         c.setGlobalAlpha();
 
+        // Flicker if hurt
+        if (this.hurtTimer > 0 &&
+            Math.round(this.hurtTimer / 4) % 2 != 0)
+            return;
+
         let xoff = this.spr.width/2;
         let yoff = 7 + this.spr.height/2;
 
@@ -99,12 +123,39 @@ abstract class Enemy extends CollisionObject {
 
     private kill(ev : GameEvent) {
 
+        this.hurtTimer = 0;
         this.dying = true;
         this.flip = Flip.None;
     }
 
 
+    private takeDamage(dmg : number, dir : Vector2, ev : GameEvent) {
+        
+        const HURT_TIME = 30;
+        const DAMAGE_TEXT_SPEED = -1.0;
+        const KNOCKBACK_SPEED = 1.0;
+
+        if ((this.health -= dmg) <= 0) {
+
+            this.kill(ev);
+        }
+        else {
+
+            this.speed.x = dir.x * KNOCKBACK_SPEED * this.mass;
+            this.speed.y = dir.y * KNOCKBACK_SPEED * this.mass;
+
+            this.hurtTimer = HURT_TIME;
+        }
+
+        this.flyingText.next().spawn(
+            dmg, this.pos.x, this.pos.y - this.spr.height +1,
+            0, DAMAGE_TEXT_SPEED, 1);
+    }
+    
+    
     public playerCollision(pl : Player, ev : GameEvent) : boolean {
+
+        const SPIN_ATTACK_KNOCKBACK_BONUS = 1.5;
 
         if (!this.isActive()) 
             return false;
@@ -119,8 +170,7 @@ abstract class Enemy extends CollisionObject {
             this.pos.y - this.hitbox.y/2,
             this.hitbox.x, this.hitbox.y,
             this.damage,
-            (new Vector2(this.pos.x - pl.getPos().x, 
-                this.pos.y - pl.getPos().y)).normalize(),
+            Vector2.direction(pl.getPos(), this.pos),
             ev);
 
         // Sword
@@ -130,10 +180,13 @@ abstract class Enemy extends CollisionObject {
                 cy - this.damageBox.y/2,
                 this.damageBox.x, this.damageBox.y)) {
 
-            ++ this.swordHitId;
+            this.swordHitId = pl.getSwordHitId();
 
-            // TODO: Reduce damage first
-            this.kill(ev);
+            this.takeDamage(pl.getSwordDamage(), 
+                pl.isSpinning() ? 
+                    Vector2.scalarMultiply(Vector2.direction(pl.getPos(), this.pos), 
+                    SPIN_ATTACK_KNOCKBACK_BONUS) :
+                    pl.getFaceDirection(), ev);
 
             return true;
         }
@@ -142,7 +195,7 @@ abstract class Enemy extends CollisionObject {
     }
 
 
-    public bombCollision(b : Bomb, ev : GameEvent) : boolean {
+    public bulletCollision(b : Bullet, ev : GameEvent) : boolean {
 
         if (!this.isActive() || !b.doesExist()) 
             return false;
@@ -150,7 +203,7 @@ abstract class Enemy extends CollisionObject {
         let cx = this.pos.x;
         let cy = this.pos.y - this.spr.height/2 + 1;
 
-        // Collision with the bomb
+        // Collision with the bullet
         if (!b.isDying() &&
             boxOverlay(b.getPos(), new Vector2(), b.getHitbox(),
             cx - this.damageBox.x/2,
@@ -168,10 +221,12 @@ abstract class Enemy extends CollisionObject {
                 cy - this.damageBox.y/2,
                 this.damageBox.x, this.damageBox.y)) {
 
-            ++ this.magicHitId;
+            this.magicHitId = b.getHitID();
 
             // TODO: Reduce damage first
-            this.kill(ev);
+            this.takeDamage(b.getDamage(),
+                Vector2.direction(b.getPos(), this.pos),
+                ev);
 
             return true;
         }
@@ -192,8 +247,7 @@ abstract class Enemy extends CollisionObject {
         if (dist < this.radius + e.radius) {
 
             dist = this.radius + e.radius - dist;
-
-            dir = Vector2.normalize(new Vector2(this.pos.x - e.pos.x, this.pos.y - e.pos.y));
+            dir = Vector2.direction(e.pos, this.pos);
 
             this.pos.x += dir.x * dist / 2;
             this.pos.y += dir.y * dist / 2;

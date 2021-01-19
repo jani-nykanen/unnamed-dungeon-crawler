@@ -28,14 +28,15 @@ class EnemyContainer {
     }
 
 
-    public spawnEnemy(type : number, x : number, y : number) {
+    public spawnEnemy(type : number, x : number, y : number, 
+        flyingText : ObjectGenerator<FlyingText>) {
 
-        this.objects.push(new this.types[type].prototype.constructor(x, y));
+        this.objects.push(new this.types[type].prototype.constructor(x, y, flyingText));
     }
 
 
     public update(cam : Camera, stage : Stage, pl : Player, 
-        bombs : ObjectGenerator<Bomb>, ev : GameEvent) {
+        bullets : ObjectGenerator<Bullet>, ev : GameEvent) {
 
         for (let o of this.objects) {
 
@@ -57,7 +58,7 @@ class EnemyContainer {
                     o.enemyToEnemyCollision(e);
                 }
 
-                bombs.applyBooleanEvent((a : any, ev : GameEvent) => o.bombCollision(a, ev), ev);
+                bullets.applyBooleanEvent((a : any, ev : GameEvent) => o.bulletCollision(a, ev), ev);
             }
         }
     }

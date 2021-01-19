@@ -52,4 +52,25 @@ class PlayerStatus {
 
         this.health = Math.max(0, this.health - amount);
     }
+
+
+    public computeSwordDamage(spinAttack : boolean) : number {
+
+        const BASE_DAMAGE = 5;
+        const SPIN_ATTACK_BONUS = 2;
+
+        let dmg = BASE_DAMAGE
+        if (spinAttack)
+            dmg += SPIN_ATTACK_BONUS;
+
+        return dmg;
+    }
+
+
+    public computeMagicDamage() : number {
+
+        const BASE_DAMAGE = 10;
+
+        return BASE_DAMAGE;
+    }
 }   

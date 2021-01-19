@@ -5,9 +5,12 @@
  */
 
 
-class Bomb extends CollisionObject {
+class Bullet extends CollisionObject {
 
     private hitId : number;
+    private friendly : boolean;
+
+    private damage : number;
 
 
     constructor() {
@@ -20,6 +23,8 @@ class Bomb extends CollisionObject {
         this.hitbox = this.collisionBox.clone();
 
         this.spr = new Sprite(24, 24);
+
+        this.damage = 0;
     }
 
 
@@ -62,8 +67,10 @@ class Bomb extends CollisionObject {
     }
 
 
-    public spawn(id : number, x : number, y : number,
+    public spawn(id : number, dmg : number,
+            x : number, y : number,
             speedx : number, speedy : number,
+            isFriendy = false,
             source : Vector2 = null) {
 
         this.pos = new Vector2(x, y);
@@ -73,6 +80,8 @@ class Bomb extends CollisionObject {
         this.spr.setFrame(0, 0);
 
         this.hitId = id;
+        this.damage = dmg;
+        this.friendly = isFriendy;
 
         this.exist = true;
         this.ignoreDeathOnCollision = false;
@@ -129,4 +138,8 @@ class Bomb extends CollisionObject {
             new Vector2(RADIUS, RADIUS),
             x, y, w, h);
     }
+
+
+    public isFriendly = () : boolean => this.friendly;
+    public getDamage = () : number => this.damage;
 }

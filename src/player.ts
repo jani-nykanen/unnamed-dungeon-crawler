@@ -31,14 +31,14 @@ class Player extends CollisionObject {
     private knockbackTimer : number;
     private hurtTimer : number;
 
-    private readonly bombs : ObjectGenerator<Bomb>;
+    private readonly bullets : ObjectGenerator<Bullet>;
     private readonly status : PlayerStatus;
-    private readonly dmgText : ObjectGenerator<PlayerDamageText>;
+    private readonly flyingText : ObjectGenerator<FlyingText>;
 
 
     constructor(x : number, y : number, 
-        bombs : ObjectGenerator<Bomb>,
-        dmgText : ObjectGenerator<PlayerDamageText>,
+        bullets : ObjectGenerator<Bullet>,
+        flyingText : ObjectGenerator<FlyingText>,
         status : PlayerStatus) {
 
         super(x, y);
@@ -65,9 +65,9 @@ class Player extends CollisionObject {
         this.spinning = false;
         this.spinStartFrameReached = false;
 
-        this.bombs = bombs;
+        this.bullets = bullets;
         this.status = status;
-        this.dmgText = dmgText;
+        this.flyingText = flyingText;
 
         this.hitbox = new Vector2(8, 6);
         this.collisionBox = new Vector2(8, 4);
@@ -190,12 +190,14 @@ class Player extends CollisionObject {
 
             this.usingMagic = true;
 
-            this.bombs.spawn(this.magicHitId ++,
+            this.bullets.next().spawn(
+                this.magicHitId ++, 
+                this.status.computeMagicDamage(),
                 this.pos.x + XOFF[this.faceColumn], 
                 this.pos.y + YOFF[this.faceColumn],
                 DIR_X[this.faceColumn] * MAGIC_SPEED, 
                 DIR_Y[this.faceColumn] * MAGIC_SPEED,
-                this.pos);
+                true, this.pos);
 
             return true;
         }
@@ -211,6 +213,7 @@ class Player extends CollisionObject {
             this.spinning = true;
             this.spinStartFrame = this.faceColumn;
             this.spinStartFrameReached = false;
+            ++ this.swordHitId;
 
             this.spr.setFrame(this.spinStartFrame, 9);
 
@@ -768,7 +771,8 @@ class Player extends CollisionObject {
 
         this.status.reduceHealth(dmg);
 
-        this.dmgText.spawn(dmg, this.pos.x, this.pos.y-this.spr.height, 0, DAMAGE_TEXT_SPEED);
+        this.flyingText.next()
+            .spawn(dmg, this.pos.x, this.pos.y-this.spr.height, 0, DAMAGE_TEXT_SPEED);
     }
 
 
@@ -789,6 +793,9 @@ class Player extends CollisionObject {
     }
 
 
-    public getSwordHitId = () => this.swordHitId;
+    public getSwordHitId = () : number => this.swordHitId;
+    public getSwordDamage = () : number => this.status.computeSwordDamage(this.spinning);
+    public getFaceDirection = () : Vector2 => this.faceDirection.clone();
+    public isSpinning = () : boolean => this.spinning;
     
 }

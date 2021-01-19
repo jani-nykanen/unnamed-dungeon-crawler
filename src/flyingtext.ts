@@ -19,7 +19,7 @@ const FLYING_TEXT_WAIT_TIME = 30;
 // Flying text does not take any collisions,
 // but it needs to extend CollisionObject so
 // we may use ObjectGenerator. Good design, I say!
-abstract class FlyingText extends CollisionObject {
+class FlyingText extends CollisionObject {
 
 
     protected message : string;
@@ -62,11 +62,10 @@ abstract class FlyingText extends CollisionObject {
     }
 
 
-    public spawn(id : number, x : number, y : number, 
-        sx : number, sy : number,
-        source : Vector2 = null) {
+    public spawn(value : number, x : number, y : number, 
+        sx : number, sy : number, color = 0) {
 
-        this.setText(id);
+        this.message = "-" + String(value);
 
         this.waitTimer = FLYING_TEXT_WAIT_TIME;
         this.moveTimer = FLYING_TEXT_MOVE_TIME;
@@ -84,19 +83,8 @@ abstract class FlyingText extends CollisionObject {
         if (!this.exist) return;
 
         c.drawText(c.getBitmap("fontSmall"), this.message,
-            Math.round(this.pos.x), Math.round(this.pos.y-4), 0, 0, true);
+            Math.round(this.pos.x), Math.round(this.pos.y-4), 
+            -2, 0, true);
     }
 
-
-    abstract setText(value : number) : void;
-}
-
-
-class PlayerDamageText extends FlyingText {
-
-
-    public setText(value : number) {
-
-        this.message = "-" + String(value);
-    }
 }

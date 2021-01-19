@@ -19,9 +19,7 @@ class ObjectGenerator<T extends CollisionObject> {
     }
 
 
-    public spawn(id : number,
-        x : number, y : number, sx : number, sy : number,
-        source : Vector2 = null) {
+    public next() : T {
 
         let o = null;
         for (let e of this.objects) {
@@ -38,7 +36,7 @@ class ObjectGenerator<T extends CollisionObject> {
             o = this.objects[this.objects.length-1];
         }
 
-        o.spawn(id, x, y, sx, sy, source);
+        return o;
     }
 
 
@@ -63,8 +61,7 @@ class ObjectGenerator<T extends CollisionObject> {
     }
 
 
-    // TODO: Get rid of any
-    public applyBooleanEvent(f : (self : any, ev : GameEvent) => boolean, 
+    public applyBooleanEvent(f : (self : T, ev : GameEvent) => boolean, 
         ev : GameEvent) : boolean {
 
         let ret = false;
