@@ -25,6 +25,8 @@ class Bullet extends CollisionObject {
         this.spr = new Sprite(24, 24);
 
         this.damage = 0;
+
+        this.enableCameraCollision = false;
     }
 
 
