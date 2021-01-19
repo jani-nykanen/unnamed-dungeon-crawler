@@ -20,7 +20,7 @@ class Slime extends Enemy {
         flyingText : ObjectGenerator<FlyingText>,
         collectibles : ObjectGenerator<Collectible>) {
 
-        super(x, y, 1, 10, flyingText, collectibles);
+        super(x, y, 1, 7, flyingText, collectibles);
 
         this.shadowType = 1;
         this.spr.setFrame((Math.random() * 4) | 0, this.spr.getRow());

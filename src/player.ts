@@ -69,7 +69,7 @@ class Player extends CollisionObject {
         this.status = status;
         this.flyingText = flyingText;
 
-        this.hitbox = new Vector2(8, 6);
+        this.hitbox = new Vector2(10, 8);
         this.collisionBox = new Vector2(8, 4);
 
         this.swordHitId = -1;
@@ -505,6 +505,8 @@ class Player extends CollisionObject {
     protected updateProperties(ev : GameEvent) {
 
         this.bounceFactor = this.rolling ? 1 : 0;
+
+        this.enableCameraCollision = this.knockbackTimer > 0.0;
     }
 
 
@@ -666,6 +668,8 @@ class Player extends CollisionObject {
 
         const CAM_SPEED = 1.0 / 20.0;
 
+        if (this.knockbackTimer > 0) return;
+
         let topLeft = cam.getWorldPos();
 
         let mx = 0;
@@ -800,4 +804,5 @@ class Player extends CollisionObject {
     
     public recoverHealth = (count : number) => this.status.recoverHealth(count);
     public addGemStones = (count : number) => this.status.addGemStones(count);
+    public addBullets = (count : number) => this.status.addBullets(count);
 }

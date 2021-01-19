@@ -9,11 +9,22 @@
 // to create
 const determineGeneratedColletibleId = (p = 1.0) : number => {
 
+    const PROB = [0.7, 0.2, 0.1];
+
     if (Math.random() > p) return -1;
 
     let v = Math.random() * 1.0;
 
-    return v < 0.5 ? 0 : 1;
+    let q = PROB[0];
+    for (let i = 1; i < PROB.length; ++ i) {
+
+        if (v < q) {
+
+            return i - 1;
+        }
+        q += PROB[i];
+    }
+    return PROB.length - 1;
 }
 
 
@@ -67,16 +78,22 @@ class Collectible extends CollisionObject {
             // Apply effect
             switch(this.id) {
 
-            // Heart
+            // Gem-stone
             case 0:
+
+                pl.addGemStones(1);
+                break;
+            
+            // Heart
+            case 1:
                 
                 pl.recoverHealth(HEALTH_RECOVERY);
                 break;
 
-            // Gem-stone
-            case 1:
+            // Bullet
+            case 2:
 
-                pl.addGemStones(1);
+                pl.addBullets(1);
                 break;
 
             default:

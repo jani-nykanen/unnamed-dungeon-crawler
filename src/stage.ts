@@ -39,6 +39,8 @@ class Stage {
 
     public readonly width : number;
     public readonly height : number;
+
+    private collectibles : ObjectGenerator<Collectible>;
     
     private baseLayer : Array<number>;
     private collisionMap : Tilemap;
@@ -101,6 +103,12 @@ class Stage {
         this.waterPos = 0;
 
         this.computePreservedTiles();
+    }
+
+
+    public passCollectibleGenerator(gen : ObjectGenerator<Collectible>) {
+
+        this.collectibles = gen;
     }
 
 
@@ -279,6 +287,7 @@ class Stage {
         const MIN_SPEED = 0.5;
         const GRAVITY_BONUS = -1.0;
         const H_BONUS = 1.25;
+        const ITEM_PROB = 0.5;
 
         let angle = 0;
         let angleStep = Math.PI * 2 / count;
@@ -294,6 +303,10 @@ class Stage {
 
             this.leaves.next().spawn(id, x, y, sx, sy);
         }
+
+        this.collectibles.next().spawn(
+            determineGeneratedColletibleId(ITEM_PROB),
+            x, y);
     }
 
 
@@ -363,9 +376,10 @@ class Stage {
     }
 
 
-    public objectCollisions(o : CollisionObject, ev : GameEvent) {
+    public objectCollisions(o : CollisionObject, cam : Camera, ev : GameEvent) {
 
         const RADIUS = 2;
+        const CAM_COL_OFFSET = 2;
 
         if (!o.doesExist() || (!o.doesIgnoreDeathOnCollision() && o.isDying())) 
             return;
@@ -393,15 +407,17 @@ class Stage {
             }
         }
 
+        let topLeft : Vector2;
+        
+        if (!cam.isMoving() && o.doesAllowCameraCollision()) {
 
-        // TEMP
-        /*
-        let topLeft = cam.getWorldPos();
-        o.verticalCollision(topLeft.x, topLeft.y + 128, 160, 1, ev);
-        o.verticalCollision(topLeft.x, topLeft.y, 160, -1, ev);
-        o.horizontalCollision(topLeft.x, topLeft.y, 128, -1, ev);
-        o.horizontalCollision(topLeft.x + 160, topLeft.y, 128, 1, ev);
-        */
+            topLeft = cam.getWorldPos();
+            o.verticalCollision(topLeft.x, topLeft.y + 128 - CAM_COL_OFFSET, 160, 1, ev, true);
+            o.verticalCollision(topLeft.x, topLeft.y + CAM_COL_OFFSET, 160, -1, ev, true);
+            o.horizontalCollision(topLeft.x + CAM_COL_OFFSET, topLeft.y, 128, -1, ev, true);
+            o.horizontalCollision(topLeft.x + 160 - CAM_COL_OFFSET, topLeft.y, 128, 1, ev, true);
+        }
+        
     }
 
 

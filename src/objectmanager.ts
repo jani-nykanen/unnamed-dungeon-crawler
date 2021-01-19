@@ -34,6 +34,8 @@ class ObjectManager {
 
         stage.generateEnemies(this.enemies, 
             this.flyingText, this.collectibles);
+
+        stage.passCollectibleGenerator(this.collectibles);
     }
 
 
@@ -54,10 +56,10 @@ class ObjectManager {
 
         this.player.update(ev);
         this.player.cameraEvent(cam);
-        stage.objectCollisions(this.player, ev);
+        stage.objectCollisions(this.player, cam, ev);
 
         this.bullets.update(cam, ev);
-        this.bullets.stageCollisions(stage, ev);
+        this.bullets.stageCollisions(stage, cam, ev);
 
         this.enemies.update(cam, stage, this.player, this.bullets, ev);
 

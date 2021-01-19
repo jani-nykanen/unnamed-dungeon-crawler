@@ -66,6 +66,12 @@ class PlayerStatus {
         this.gems = Math.min(99, this.gems + count);
     }
 
+    
+    public addBullets(count : number) {
+
+        this.bulletCount = Math.min(99, this.bulletCount + count);
+    }
+
 
     public computeSwordDamage(spinAttack : boolean) : number {
 

@@ -161,6 +161,8 @@ abstract class CollisionObject extends GameObject {
     protected ignoreDeathOnCollision : boolean;
     protected avoidWater : boolean;
 
+    protected enableCameraCollision : boolean;
+
 
     constructor(x : number, y : number) {
 
@@ -171,6 +173,7 @@ abstract class CollisionObject extends GameObject {
 
         this.ignoreDeathOnCollision = false;
         this.avoidWater = false;
+        this.enableCameraCollision = true;
     }
 
 
@@ -289,6 +292,7 @@ abstract class CollisionObject extends GameObject {
 
 
     public doesIgnoreDeathOnCollision = () : boolean => this.ignoreDeathOnCollision;
+    public doesAllowCameraCollision = () : boolean => this.enableCameraCollision;
     public doesAvoidWater = () : boolean => this.avoidWater;
 
     public getHitbox = () : Vector2 => this.hitbox.clone();

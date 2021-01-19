@@ -7,6 +7,7 @@
 
 abstract class Enemy extends CollisionObject {
 
+    private startPos : Vector2;
 
     private swordHitId : number;
     private magicHitId : number;
@@ -26,6 +27,8 @@ abstract class Enemy extends CollisionObject {
     protected damageBox : Vector2;
     protected hurtTimer : number;
 
+    protected canBeReset : boolean;
+
     
     constructor(x : number, y : number, row : number,
         health : number,
@@ -33,6 +36,8 @@ abstract class Enemy extends CollisionObject {
         collectibles : ObjectGenerator<Collectible>) {
 
         super(x, y);
+
+        this.startPos = this.pos.clone();
 
         this.spr = new Sprite(16, 16);
         this.spr.setFrame(0, row);
@@ -59,6 +64,26 @@ abstract class Enemy extends CollisionObject {
 
         this.flyingText = flyingText;
         this.collectibles = collectibles;
+
+        this.canBeReset = false;
+    }
+
+
+    protected reset() {}
+
+
+    protected outsideCameraEvent() {
+
+        if (this.canBeReset) {
+
+            this.stopMovement();
+
+            this.pos = this.startPos.clone();
+            this.health = this.maxHealth;
+
+            this.canBeReset = false;
+            this.reset();
+        }
     }
 
 
@@ -90,6 +115,8 @@ abstract class Enemy extends CollisionObject {
             this.hurtTimer -= ev.step;
 
         this.updateAI(ev);
+
+        this.canBeReset = true;
     }
 
 
