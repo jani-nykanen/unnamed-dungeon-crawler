@@ -47,10 +47,23 @@ class PlayerStatus {
         return this.bulletCount == newCount;
     }
 
-    
+
+    public recoverHealth(amount : number) {
+
+        this.health = Math.min(this.maxHealth, this.health + amount);
+    }
+
+
+    // TODO: Merge this and the function above+
     public reduceHealth(amount : number) {
 
         this.health = Math.max(0, this.health - amount);
+    }
+
+
+    public addGemStones(count : number) {
+
+        this.gems = Math.min(99, this.gems + count);
     }
 
 

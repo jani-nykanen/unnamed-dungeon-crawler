@@ -11,6 +11,7 @@ class ObjectManager {
     private player : Player;
     private bullets : ObjectGenerator<Bullet>;
     private flyingText : ObjectGenerator<FlyingText>;
+    private collectibles : ObjectGenerator<Collectible>;
     private enemies : EnemyContainer;
 
     private objectRenderBuffer : Array<GameObject>;
@@ -20,6 +21,7 @@ class ObjectManager {
 
         this.bullets = new ObjectGenerator<Bullet> (Bullet);
         this.flyingText = new ObjectGenerator<FlyingText> (FlyingText);
+        this.collectibles = new ObjectGenerator<Collectible> (Collectible);
         this.player = new Player(80, 72, this.bullets, this.flyingText, status);
         
         this.enemies = new EnemyContainer(getEnemyList());
@@ -30,7 +32,8 @@ class ObjectManager {
 
     public generateObjects(stage : Stage) {
 
-        stage.generateEnemies(this.enemies, this.flyingText);
+        stage.generateEnemies(this.enemies, 
+            this.flyingText, this.collectibles);
     }
 
 
@@ -58,12 +61,17 @@ class ObjectManager {
 
         this.enemies.update(cam, stage, this.player, this.bullets, ev);
 
+        this.collectibles.update(cam, ev);
+        this.collectibles.applyBooleanEvent(
+            (c : Collectible, ev : GameEvent) => c.playerCollision(this.player, ev), ev);
+
         this.flyingText.update(null, ev);
     }
 
 
     public draw(c : Canvas, stage : Stage) {
 
+        this.collectibles.draw(c);
 
         // Push object to the array
         this.objectRenderBuffer.push(this.player);

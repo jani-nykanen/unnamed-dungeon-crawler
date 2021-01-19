@@ -12,6 +12,7 @@ abstract class Enemy extends CollisionObject {
     private magicHitId : number;
 
     private readonly flyingText : ObjectGenerator<FlyingText>;
+    private readonly collectibles : ObjectGenerator<Collectible>;
 
     protected flip : Flip;
     protected shadowType : number;
@@ -28,7 +29,8 @@ abstract class Enemy extends CollisionObject {
     
     constructor(x : number, y : number, row : number,
         health : number,
-        flyingText : ObjectGenerator<FlyingText>) {
+        flyingText : ObjectGenerator<FlyingText>,
+        collectibles : ObjectGenerator<Collectible>) {
 
         super(x, y);
 
@@ -56,6 +58,7 @@ abstract class Enemy extends CollisionObject {
         this.hurtTimer = 0;
 
         this.flyingText = flyingText;
+        this.collectibles = collectibles;
     }
 
 
@@ -123,9 +126,20 @@ abstract class Enemy extends CollisionObject {
 
     private kill(ev : GameEvent) {
 
+        const COLLECTIBLE_PROBABILITY = 0.5;
+        const COL_OFFSET_Y = -4;
+
         this.hurtTimer = 0;
         this.dying = true;
         this.flip = Flip.None;
+
+        // Spawn a collectible
+        let collectibleType = determineGeneratedColletibleId(COLLECTIBLE_PROBABILITY);
+        if (collectibleType >= 0) {
+
+            this.collectibles.next().spawn(collectibleType,
+                this.pos.x, this.pos.y + COL_OFFSET_Y);
+        }
     }
 
 

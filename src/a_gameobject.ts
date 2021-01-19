@@ -130,6 +130,15 @@ abstract class GameObject extends ExistingObject {
     }
 
 
+    public overlayObject(o : GameObject) : boolean {
+
+        return boxOverlay(this.pos, this.center, this.hitbox,
+            o.pos.x + o.center.x - o.hitbox.x/2,
+            o.pos.y + o.center.y - o.hitbox.y/2,
+            o.hitbox.x, o.hitbox.y);
+    }
+
+
     public draw(c : Canvas) {}
     public postDraw(c : Canvas) {}
 

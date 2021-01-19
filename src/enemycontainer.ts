@@ -29,9 +29,11 @@ class EnemyContainer {
 
 
     public spawnEnemy(type : number, x : number, y : number, 
-        flyingText : ObjectGenerator<FlyingText>) {
+        flyingText : ObjectGenerator<FlyingText>,
+        collectibles : ObjectGenerator<Collectible>) {
 
-        this.objects.push(new this.types[type].prototype.constructor(x, y, flyingText));
+        this.objects.push(new this.types[type].prototype.constructor(
+            x, y, flyingText, collectibles));
     }
 
 

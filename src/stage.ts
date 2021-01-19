@@ -408,7 +408,8 @@ class Stage {
     private genEnemiesToSingleRoom(enemies : EnemyContainer,
         dx : number, dy : number, 
         minCount : number, maxCount : number,
-        flyingText : ObjectGenerator<FlyingText>) {
+        flyingText : ObjectGenerator<FlyingText>,
+        collectibles : ObjectGenerator<Collectible>) {
 
         let leftx = dx * ROOM_WIDTH + 1;
         let topy = dy * ROOM_HEIGHT + 1;
@@ -442,7 +443,8 @@ class Stage {
                     }
                     continue;
                 }
-                enemies.spawnEnemy(0, px * 16 + 8, py * 16 + 8, flyingText);
+                enemies.spawnEnemy(0, px * 16 + 8, py * 16 + 8, 
+                    flyingText, collectibles);
                 this.preservedTiles[py * this.width + px] = true;
                 break;
             }
@@ -452,7 +454,8 @@ class Stage {
 
 
     public generateEnemies(enemies : EnemyContainer, 
-        flyingText : ObjectGenerator<FlyingText>) {
+        flyingText : ObjectGenerator<FlyingText>,
+        collectibles : ObjectGenerator<Collectible>) {
 
         // TEMP
         const MIN_ENEMY_COUNT = 1;
@@ -468,7 +471,8 @@ class Stage {
                 
                 this.genEnemiesToSingleRoom(enemies, x, y,
                     MIN_ENEMY_COUNT,
-                    MAX_ENEMY_COUNT, flyingText);
+                    MAX_ENEMY_COUNT, 
+                    flyingText, collectibles);
             }
         }
 

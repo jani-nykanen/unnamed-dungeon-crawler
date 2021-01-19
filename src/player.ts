@@ -798,4 +798,6 @@ class Player extends CollisionObject {
     public getFaceDirection = () : Vector2 => this.faceDirection.clone();
     public isSpinning = () : boolean => this.spinning;
     
+    public recoverHealth = (count : number) => this.status.recoverHealth(count);
+    public addGemStones = (count : number) => this.status.addGemStones(count);
 }

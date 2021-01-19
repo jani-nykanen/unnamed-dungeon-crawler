@@ -73,6 +73,8 @@ class ObjectGenerator<T extends CollisionObject> {
     }
 
 
+    // Note: this ignores depth, and just draws them
+    // in the order they are in the array
     public draw(c : Canvas) {
 
         for (let o of this.objects) {

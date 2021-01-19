@@ -5,7 +5,21 @@
  */
 
 
-class Collectible extends GameObject {
+// A general function for determining which collectible
+// to create
+const determineGeneratedColletibleId = (p = 1.0) : number => {
+
+    if (Math.random() > p) return -1;
+
+    let v = Math.random() * 1.0;
+
+    return v < 0.5 ? 0 : 1;
+}
+
+
+// It's a collision object only because this way we may
+// use ObjectGenerator
+class Collectible extends CollisionObject {
 
 
     private id : number;
@@ -21,6 +35,13 @@ class Collectible extends GameObject {
     }
 
 
+    protected outsideCameraEvent() {
+
+        this.exist = false;
+        this.dying = false;
+    }
+
+
     public spawn(id : number, x : number, y : number) {
 
         this.pos = new Vector2(x, y);
@@ -29,6 +50,42 @@ class Collectible extends GameObject {
         this.spr.setFrame(this.id, 0);
 
         this.exist = true;
+    }
+
+
+    public playerCollision(pl : Player, ev : GameEvent) : boolean {
+
+        const HEALTH_RECOVERY = 2;
+
+        if (!this.exist || !this.inCamera) 
+            return;
+
+        if (this.overlayObject(pl)) {
+
+            this.exist = false;
+
+            // Apply effect
+            switch(this.id) {
+
+            // Heart
+            case 0:
+                
+                pl.recoverHealth(HEALTH_RECOVERY);
+                break;
+
+            // Gem-stone
+            case 1:
+
+                pl.addGemStones(1);
+                break;
+
+            default:
+                break;
+            }
+
+            return true;
+        }
+        return false;
     }
 
 
