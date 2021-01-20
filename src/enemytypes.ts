@@ -366,6 +366,7 @@ class Fungus extends Enemy {
     protected updateAI(ev : GameEvent) {
         
         const MOUTH_TIME = 20;
+        const BULLET_SPEED = 1.0;
 
         if (!this.shooting) {
 
@@ -374,6 +375,9 @@ class Fungus extends Enemy {
 
                 this.shooting = true;
                 this.spr.setFrame(1, this.spr.getRow());
+                
+                this.shootBullet(1, 2, this.pos.x, this.pos.y - 4, 
+                    BULLET_SPEED, this.dir);
             }
         }
         else {

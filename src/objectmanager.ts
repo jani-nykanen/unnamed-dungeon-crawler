@@ -58,6 +58,8 @@ class ObjectManager {
         this.player.update(ev);
         this.player.cameraEvent(cam);
         stage.objectCollisions(this.player, cam, ev);
+        this.bullets.applyBooleanEvent(
+            (b : Bullet, ev : GameEvent) => this.player.bulletCollision(b, ev), ev);
 
         this.bullets.update(cam, ev);
         this.bullets.stageCollisions(stage, cam, ev);

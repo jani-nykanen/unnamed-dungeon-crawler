@@ -7,8 +7,10 @@
 
 class Bullet extends CollisionObject {
 
+
     private hitId : number;
     private friendly : boolean;
+    private id : number;
 
     private damage : number;
 
@@ -30,6 +32,17 @@ class Bullet extends CollisionObject {
     }
 
 
+    protected determineCollisionBox() {
+
+        const DIAMATER = [6, 4];
+
+        let d = DIAMATER[clamp(this.id | 0, 0, DIAMATER.length-1)];
+
+        this.collisionBox = new Vector2(d, d);
+        this.hitbox = this.collisionBox.clone();
+    }
+
+
     protected outsideCameraEvent() {
 
         this.exist = false;
@@ -41,7 +54,8 @@ class Bullet extends CollisionObject {
 
         const DEATH_SPEED = 4;
 
-        this.spr.animate(0, 4, 8, DEATH_SPEED, ev.step);
+        this.spr.animate(this.spr.getRow(), 
+            4, 8, DEATH_SPEED, ev.step);
 
         return this.spr.getColumn() == 8;
     }
@@ -51,7 +65,7 @@ class Bullet extends CollisionObject {
 
         const ANIM_SPEED = 3;
 
-        this.spr.animate(0, 0, 3, ANIM_SPEED, ev.step);
+        this.spr.animate(this.spr.getRow(), 0, 3, ANIM_SPEED, ev.step);
     }
 
 
@@ -69,8 +83,8 @@ class Bullet extends CollisionObject {
     }
 
 
-    public spawn(id : number, dmg : number,
-            x : number, y : number,
+    public spawn(id : number, hitId : number,
+            dmg : number, x : number, y : number,
             speedx : number, speedy : number,
             isFriendy = false,
             source : Vector2 = null) {
@@ -79,9 +93,10 @@ class Bullet extends CollisionObject {
         this.speed = new Vector2(speedx, speedy);
         this.target = this.speed.clone();
 
-        this.spr.setFrame(0, 0);
+        this.id = id;
+        this.spr.setFrame(0, this.id);
 
-        this.hitId = id;
+        this.hitId = hitId;
         this.damage = dmg;
         this.friendly = isFriendy;
 
@@ -96,6 +111,8 @@ class Bullet extends CollisionObject {
 
             this.oldPos = this.pos.clone();
         }
+
+        this.determineCollisionBox();
     }
 
 
@@ -134,7 +151,8 @@ class Bullet extends CollisionObject {
 
         const RADIUS = 24;
 
-        return this.dying && 
+        return this.friendly &&
+            this.dying && 
             boxOverlay(this.pos, 
             new Vector2(), 
             new Vector2(RADIUS, RADIUS),

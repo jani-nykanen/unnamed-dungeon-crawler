@@ -309,4 +309,16 @@ abstract class Enemy extends CollisionObject {
         return false;
     }
 
+
+    /*
+     * Utility functions
+     */
+
+    
+    protected shootBullet(id : number, dmg : number,
+        x : number, y : number, speed : number, dir : Vector2) {
+
+        this.bullets.next().spawn(id, -1, dmg, x, y, 
+            speed * dir.x, speed * dir.y, false, this.pos);
+    }
 }

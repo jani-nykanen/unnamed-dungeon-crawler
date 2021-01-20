@@ -31,6 +31,8 @@ class Player extends CollisionObject {
     private knockbackTimer : number;
     private hurtTimer : number;
 
+    private damageBox : Vector2;
+
     private readonly bullets : ObjectGenerator<Bullet>;
     private readonly status : PlayerStatus;
     private readonly flyingText : ObjectGenerator<FlyingText>;
@@ -75,6 +77,8 @@ class Player extends CollisionObject {
         this.swordHitId = -1;
         this.magicHitId = -1;
         this.swordHitbox = new Rect();
+        
+        this.damageBox = new Vector2(10, 10);
 
         this.knockbackTimer = 0;
         this.hurtTimer = 0;
@@ -191,7 +195,7 @@ class Player extends CollisionObject {
             this.usingMagic = true;
 
             this.bullets.next().spawn(
-                this.magicHitId ++, 
+                0, this.magicHitId ++, 
                 this.status.computeMagicDamage(),
                 this.pos.x + XOFF[this.faceColumn], 
                 this.pos.y + YOFF[this.faceColumn],
@@ -793,6 +797,29 @@ class Player extends CollisionObject {
             return true;
         }
 
+        return false;
+    }
+
+
+    public bulletCollision(b : Bullet, ev : GameEvent) : boolean {
+
+        if (!b.doesExist() || b.isDying() || b.isFriendly())
+            return false;
+
+        if (this.hurtTimer > 0 || this.rolling) 
+            return false;
+
+        let p = b.getPos();
+        let hbox = b.getHitbox();
+
+        if (boxOverlay(new Vector2(this.pos.x, this.pos.y - this.spr.height/2 + 1), 
+            this.center, this.damageBox, p.x - hbox.x/2, p.y - hbox.y/2,
+            hbox.x, hbox.y)) {
+
+            this.hurt(b.getDamage(), null, ev);
+            b.kill(ev);
+            return true;
+        }   
         return false;
     }
 
