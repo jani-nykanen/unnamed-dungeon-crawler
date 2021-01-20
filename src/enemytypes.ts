@@ -6,7 +6,7 @@
 
 
 const getEnemyList = () : Array<Function> => [
-    Slime, Bat, Spider
+    Slime, Bat, Spider, Fly
 ];
 
 
@@ -202,5 +202,71 @@ class Spider extends Enemy {
             this.speed.y *= -1;
         }
     }
+}
+
+
+class Fly extends Enemy {
+
+    
+    private dir : Vector2;
+    private moveTimer : number;
+
+
+    static WAIT_TIME = 120;
+
+
+    constructor(x : number, y : number, 
+        flyingText : ObjectGenerator<FlyingText>,
+        collectibles : ObjectGenerator<Collectible>) {
+
+        super(x, y, 4, 7, flyingText, collectibles);
+
+        this.shadowType = 1;
+        this.spr.setFrame(0, this.spr.getRow());
+
+        this.mass = 1.0;
+        this.friction = new Vector2(0.0125, 0.0125);
+        this.dir = new Vector2(0, 1);
+
+        this.radius = 5;
+        this.damage = 2;
+
+        this.hitbox = new Vector2(6, 3);
+        this.collisionBox = this.hitbox.clone();
+        this.damageBox = new Vector2(10, 10);
+
+        this.moveTimer = Fly.WAIT_TIME/2 + ((Math.random() * Fly.WAIT_TIME/2) | 0);
+
+        this.avoidWater = false;
+
+        this.bounceFactor = 1.0;
+    }
+
+
+    protected updateAI(ev : GameEvent) {
+        
+        const ANIM_SPEED = 8;
+        const ANIM_SPEED_MOD = 4;
+        const RUSH_SPEED = 1.25;
+
+        this.target.zeros();
+
+        if ((this.moveTimer -= ev.step) <= 0) {
+
+            this.speed = Vector2.scalarMultiply(this.dir, RUSH_SPEED);
+            this.moveTimer += Fly.WAIT_TIME;
+        }
+
+        this.spr.animate(this.spr.getRow(), 0, 3, 
+            ANIM_SPEED - this.speed.length() * ANIM_SPEED_MOD, 
+            ev.step);
+    }
+
+
+    protected playerEvent(pl : Player, ev : GameEvent) {
+
+        this.dir = Vector2.direction(this.pos, pl.getPos());
+    }
+
 }
 
