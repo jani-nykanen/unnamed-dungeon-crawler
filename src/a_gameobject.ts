@@ -160,6 +160,7 @@ abstract class CollisionObject extends GameObject {
     protected bounceFactor : number;
     protected ignoreDeathOnCollision : boolean;
     protected avoidWater : boolean;
+    protected disableCollisions : boolean;
 
     protected enableCameraCollision : boolean;
 
@@ -174,6 +175,8 @@ abstract class CollisionObject extends GameObject {
         this.ignoreDeathOnCollision = false;
         this.avoidWater = false;
         this.enableCameraCollision = true;
+
+        this.disableCollisions = false;
     }
 
 
@@ -190,7 +193,7 @@ abstract class CollisionObject extends GameObject {
         const FAR_MARGIN = 6;
         
         if (!this.inCamera ||
-            //(!force && this.disableCollisions) ||
+            (!force && this.disableCollisions) ||
             !this.exist || this.dying || 
             this.speed.x * dir < EPS) 
             return false;
@@ -232,7 +235,7 @@ abstract class CollisionObject extends GameObject {
         const FAR_MARGIN = 6;
         
         if (!this.inCamera ||
-            //(!force && this.disableCollisions) ||
+            (!force && this.disableCollisions) ||
             !this.exist || this.dying || 
             this.speed.y * dir < EPS) 
             return false;

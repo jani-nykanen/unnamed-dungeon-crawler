@@ -24,7 +24,8 @@ class ObjectManager {
         this.collectibles = new ObjectGenerator<Collectible> (Collectible);
         this.player = new Player(80, 72, this.bullets, this.flyingText, status);
         
-        this.enemies = new EnemyContainer(getEnemyList());
+        this.enemies = new EnemyContainer(getEnemyList(),
+            this.flyingText, this.collectibles, this.bullets);
 
         this.objectRenderBuffer = new Array<GameObject> ();
     }

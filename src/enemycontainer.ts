@@ -13,13 +13,24 @@ class EnemyContainer {
 
     public readonly maxEnemyTypeIndex : number;
 
+    private readonly flyingText : ObjectGenerator<FlyingText>;
+    private readonly collectibles : ObjectGenerator<Collectible>;
+    private readonly bullets : ObjectGenerator<Bullet>;
 
-    constructor(types : Array<Function>) {
+
+    constructor(types : Array<Function>,
+            flyingText : ObjectGenerator<FlyingText>,
+            collectibles : ObjectGenerator<Collectible>,
+            bullets : ObjectGenerator<Bullet>) {
 
         this.objects = new Array<Enemy> ();
         this.types = Array.from(types);
 
         this.maxEnemyTypeIndex = this.types.length -1;
+
+        this.flyingText = flyingText;
+        this.collectibles = collectibles;
+        this.bullets = bullets;
     }
 
 
@@ -36,8 +47,10 @@ class EnemyContainer {
         flyingText : ObjectGenerator<FlyingText>,
         collectibles : ObjectGenerator<Collectible>) {
 
-        this.objects.push(new this.types[type].prototype.constructor(
-            x, y, flyingText, collectibles));
+        this.objects.push((new this.types[type].prototype.constructor(
+            x, y, flyingText, collectibles)).passGenerators(
+                this.flyingText, this.collectibles, this.bullets
+            ));
     }
 
 

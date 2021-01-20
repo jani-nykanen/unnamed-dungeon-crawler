@@ -6,7 +6,8 @@
 
 
 const getEnemyList = () : Array<Function> => [
-    Slime, Bat, Spider, Fly
+    Slime, Bat, Spider, Fly,
+    Spook
 ];
 
 
@@ -16,11 +17,9 @@ class Slime extends Enemy {
     private dir : Vector2;
 
 
-    constructor(x : number, y : number, 
-        flyingText : ObjectGenerator<FlyingText>,
-        collectibles : ObjectGenerator<Collectible>) {
+    constructor(x : number, y : number) {
 
-        super(x, y, 1, 5, flyingText, collectibles);
+        super(x, y, 1, 5);
 
         this.shadowType = 1;
         this.spr.setFrame((Math.random() * 4) | 0, this.spr.getRow());
@@ -76,11 +75,9 @@ class Bat extends Enemy {
     private dir : Vector2;
 
 
-    constructor(x : number, y : number, 
-        flyingText : ObjectGenerator<FlyingText>,
-        collectibles : ObjectGenerator<Collectible>) {
+    constructor(x : number, y : number) {
 
-        super(x, y, 2, 7, flyingText, collectibles);
+        super(x, y, 2, 7);
 
         this.shadowType = 1;
         this.spr.setFrame((Math.random() * 4) | 0, this.spr.getRow());
@@ -129,11 +126,9 @@ class Spider extends Enemy {
     static MOVE_TIME = 60;
 
 
-    constructor(x : number, y : number, 
-        flyingText : ObjectGenerator<FlyingText>,
-        collectibles : ObjectGenerator<Collectible>) {
+    constructor(x : number, y : number) {
 
-        super(x, y, 3, 10, flyingText, collectibles);
+        super(x, y, 3, 10);
 
         this.shadowType = 0;
         this.spr.setFrame(0, this.spr.getRow());
@@ -215,11 +210,9 @@ class Fly extends Enemy {
     static WAIT_TIME = 120;
 
 
-    constructor(x : number, y : number, 
-        flyingText : ObjectGenerator<FlyingText>,
-        collectibles : ObjectGenerator<Collectible>) {
+    constructor(x : number, y : number) {
 
-        super(x, y, 4, 7, flyingText, collectibles);
+        super(x, y, 4, 7);
 
         this.shadowType = 1;
         this.spr.setFrame(0, this.spr.getRow());
@@ -270,3 +263,67 @@ class Fly extends Enemy {
 
 }
 
+
+
+class Spook extends Enemy {
+
+    
+    private dir : Vector2;
+    private angleDif : number;
+
+
+    constructor(x : number, y : number) {
+
+        super(x, y, 5, 10);
+
+        this.shadowType = 1;
+        this.spr.setFrame((Math.random() * 4) | 0, this.spr.getRow());
+
+        this.friction = new Vector2(0.025, 0.025);
+        this.dir = new Vector2(0, 1);
+
+        this.radius = 4;
+        this.damage = 3;
+
+        this.hitbox = new Vector2(6, 4);
+        this.collisionBox = this.hitbox.clone();
+        this.damageBox = new Vector2(10, 10);
+
+        this.avoidWater = false;
+        this.disableCollisions = true;
+
+        this.angleDif = Math.random() * Math.PI * 2;
+    }
+
+
+    protected updateAI(ev : GameEvent) {
+        
+        const ANIM_SPEED = 10;
+        const MOVE_SPEED = 0.5;
+        const ANGLE_DIF_SPEED = 0.025;
+
+        this.spr.animate(this.spr.getRow(), 0, 3, ANIM_SPEED, ev.step);
+        this.flip = this.speed.x < 0 ? Flip.None : Flip.Horizontal;
+
+        this.angleDif = (this.angleDif + ANGLE_DIF_SPEED * ev.step) % 
+			(Math.PI * 2);
+
+        this.target = Vector2.scalarMultiply(this.dir, MOVE_SPEED);
+    }
+
+
+    protected playerEvent(pl : Player, ev : GameEvent) {
+
+        const ORBIT_RADIUS = 32.0;
+
+		let px = pl.getPos().x + Math.cos(this.angleDif) * ORBIT_RADIUS;
+		let py = pl.getPos().y + Math.sin(this.angleDif) * ORBIT_RADIUS;
+
+		this.dir = (new Vector2(
+				px - this.pos.x, 
+				py - this.pos.y))
+			.normalize(true);
+        // this.dir = Vector2.direction(this.pos, pl.getPos());
+    }
+
+}

@@ -12,8 +12,9 @@ abstract class Enemy extends CollisionObject {
     private swordHitId : number;
     private magicHitId : number;
 
-    private readonly flyingText : ObjectGenerator<FlyingText>;
-    private readonly collectibles : ObjectGenerator<Collectible>;
+    private flyingText : ObjectGenerator<FlyingText>;
+    private collectibles : ObjectGenerator<Collectible>;
+    private bullets : ObjectGenerator<Bullet>;
 
     protected flip : Flip;
     protected shadowType : number;
@@ -30,10 +31,7 @@ abstract class Enemy extends CollisionObject {
     protected canBeReset : boolean;
 
     
-    constructor(x : number, y : number, row : number,
-        health : number,
-        flyingText : ObjectGenerator<FlyingText>,
-        collectibles : ObjectGenerator<Collectible>) {
+    constructor(x : number, y : number, row : number, health : number) {
 
         super(x, y);
 
@@ -62,10 +60,20 @@ abstract class Enemy extends CollisionObject {
         this.damageBox = new Vector2(this.spr.width, this.spr.height);
         this.hurtTimer = 0;
 
+        this.canBeReset = false;
+    }
+
+
+    public passGenerators(
+        flyingText : ObjectGenerator<FlyingText>,
+        collectibles : ObjectGenerator<Collectible>,
+        bullets : ObjectGenerator<Bullet>) : Enemy {
+
         this.flyingText = flyingText;
         this.collectibles = collectibles;
+        this.bullets = bullets;
 
-        this.canBeReset = false;
+        return this;
     }
 
 
