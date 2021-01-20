@@ -435,8 +435,11 @@ class Stage {
         let px, py : number;
         let startx, starty : number;
         let count = minCount + ((Math.random() * ( (maxCount+1) - minCount)) | 0);
+        let typeIndex : number;
 
         for (let i = 0; i < count; ++ i) {
+
+            typeIndex = ((Math.random() * (enemies.maxEnemyTypeIndex+1)) | 0); 
 
             startx = leftx + ((Math.random() * w) | 0);
             starty = topy + ((Math.random() * h) | 0);
@@ -459,7 +462,7 @@ class Stage {
                     }
                     continue;
                 }
-                enemies.spawnEnemy(0, px * 16 + 8, py * 16 + 8, 
+                enemies.spawnEnemy(typeIndex, px * 16 + 8, py * 16 + 8, 
                     flyingText, collectibles);
                 this.preservedTiles[py * this.width + px] = true;
                 break;

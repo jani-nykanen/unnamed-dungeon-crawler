@@ -11,11 +11,15 @@ class EnemyContainer {
     private objects : Array<Enemy>;
     private types : Array<Function>;
 
+    public readonly maxEnemyTypeIndex : number;
+
 
     constructor(types : Array<Function>) {
 
         this.objects = new Array<Enemy> ();
         this.types = Array.from(types);
+
+        this.maxEnemyTypeIndex = this.types.length -1;
     }
 
 
