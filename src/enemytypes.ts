@@ -7,7 +7,7 @@
 
 const getEnemyList = () : Array<Function> => [
     Slime, Bat, Spider, Fly,
-    Spook
+    Spook, Fungus,
 ];
 
 
@@ -326,4 +326,70 @@ class Spook extends Enemy {
         // this.dir = Vector2.direction(this.pos, pl.getPos());
     }
 
+}
+
+
+class Fungus extends Enemy {
+
+
+    static SHOOT_TIME = 100;
+
+
+    private dir : Vector2;
+    private shootTimer : number;
+    private shooting : boolean;
+
+
+    constructor(x : number, y : number) {
+
+        super(x, y, 6, 10);
+
+        this.shadowType = 1;
+        this.spr.setFrame(0, this.spr.getRow());
+
+        this.friction = new Vector2(0.05, 0.05);
+        this.dir = new Vector2(0, 1);
+
+        this.radius = 4;
+        this.damage = 2;
+
+        this.hitbox = new Vector2(6, 4);
+        this.collisionBox = this.hitbox.clone();
+        this.damageBox = new Vector2(10, 10);
+
+        this.shootTimer = Fungus.SHOOT_TIME/2 + Math.random() * Fungus.SHOOT_TIME/2;
+        this.shooting = false;
+
+    }
+
+
+    protected updateAI(ev : GameEvent) {
+        
+        const MOUTH_TIME = 20;
+
+        if (!this.shooting) {
+
+            this.flip = this.dir.x < 0 ? Flip.None : Flip.Horizontal;  
+            if ((this.shootTimer -= ev.step) <= 0.0) {
+
+                this.shooting = true;
+                this.spr.setFrame(1, this.spr.getRow());
+            }
+        }
+        else {
+
+            this.spr.animate(this.spr.getRow(), 1, 0, MOUTH_TIME, ev.step);
+            if (this.spr.getColumn() == 0) {
+
+                this.shootTimer += Fungus.SHOOT_TIME;
+                this.shooting = false;
+            }
+        }
+    }
+
+
+    protected playerEvent(pl : Player, ev : GameEvent) {
+
+        this.dir = Vector2.direction(this.pos, pl.getPos());
+    }
 }

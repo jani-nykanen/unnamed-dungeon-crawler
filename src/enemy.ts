@@ -14,7 +14,7 @@ abstract class Enemy extends CollisionObject {
 
     private flyingText : ObjectGenerator<FlyingText>;
     private collectibles : ObjectGenerator<Collectible>;
-    private bullets : ObjectGenerator<Bullet>;
+    protected bullets : ObjectGenerator<Bullet>;
 
     protected flip : Flip;
     protected shadowType : number;
@@ -246,7 +246,7 @@ abstract class Enemy extends CollisionObject {
 
     public bulletCollision(b : Bullet, ev : GameEvent) : boolean {
 
-        if (!this.isActive() || !b.doesExist()) 
+        if (!this.isActive() || !b.doesExist() || !b.isFriendly()) 
             return false;
 
         let cx = this.pos.x;
