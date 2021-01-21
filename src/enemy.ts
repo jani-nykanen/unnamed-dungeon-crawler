@@ -7,7 +7,8 @@
 
 abstract class Enemy extends CollisionObject {
 
-    private startPos : Vector2;
+    protected startPos : Vector2;
+    protected shift : Vector2;
 
     private swordHitId : number;
     private magicHitId : number;
@@ -36,6 +37,7 @@ abstract class Enemy extends CollisionObject {
         super(x, y);
 
         this.startPos = this.pos.clone();
+        this.shift = new Vector2();
 
         this.spr = new Sprite(16, 16);
         this.spr.setFrame(0, row);
@@ -142,9 +144,12 @@ abstract class Enemy extends CollisionObject {
         c.setGlobalAlpha(0.67);
         c.drawBitmapRegion(shadow, 
             this.shadowType*16, 0, 16, 8,
-            px - shadow.width/4, 
-            py - shadow.height/2);
+            px - 8, 
+            py - 4);
         c.setGlobalAlpha();
+
+        px += this.shift.x | 0;
+        py += this.shift.y | 0;
 
         // Flicker if hurt
         if (this.hurtTimer > 0 &&

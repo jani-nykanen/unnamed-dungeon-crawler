@@ -7,7 +7,7 @@
 
 const getEnemyList = () : Array<Function> => [
     Slime, Bat, Spider, Fly,
-    Spook, Fungus,
+    Spook, Fungus, FatFungus, Apple,
 ];
 
 
@@ -170,7 +170,6 @@ class Spider extends Enemy {
 
         if (this.moving) {
 
-            
             this.flip = this.target.x < 0 ? Flip.None : Flip.Horizontal;
 
             this.spr.animate(this.spr.getRow(), 0, 3, ANIM_SPEED, ev.step);
@@ -329,20 +328,30 @@ class Spook extends Enemy {
 }
 
 
-class Fungus extends Enemy {
+
+class CoreMushroom extends Enemy {
 
 
-    static SHOOT_TIME = 100;
-
+    private bulletCount : number;
+    private bulletId : number;
+    private bulletAngle : number;
 
     private dir : Vector2;
     private shootTimer : number;
     private shooting : boolean;
+    private shootTime : number;
 
 
-    constructor(x : number, y : number) {
+    constructor(x : number, y : number, row : number, 
+        bulletCount : number, bulletId : number, bulletAngle : number,
+        shootTime : number, health : number) {
 
-        super(x, y, 6, 10);
+        super(x, y, row, health);
+
+        this.bulletCount = bulletCount;
+        this.bulletAngle = bulletAngle;
+        this.bulletId = bulletId;
+        this.shootTime = shootTime;
 
         this.shadowType = 1;
         this.spr.setFrame(0, this.spr.getRow());
@@ -357,16 +366,31 @@ class Fungus extends Enemy {
         this.collisionBox = this.hitbox.clone();
         this.damageBox = new Vector2(10, 10);
 
-        this.shootTimer = Fungus.SHOOT_TIME/2 + Math.random() * Fungus.SHOOT_TIME/2;
+        this.shootTimer = this.shootTime/2 + Math.random() * this.shootTime/2;
         this.shooting = false;
+    }
 
+
+    private shootBullets(ev : GameEvent) {
+
+        const BULLET_SPEED = 1.25;
+
+        let startAngle = Math.atan2(this.dir.y, this.dir.x) - ((this.bulletCount / 2) | 0) * this.bulletAngle;
+        let angle = startAngle;
+
+        for (let i = 0; i < this.bulletCount; ++ i) {
+
+            angle = startAngle + i * this.bulletAngle;
+
+            this.shootBullet(this.bulletId, 2, this.pos.x, this.pos.y - 4, 
+                BULLET_SPEED, new Vector2(Math.cos(angle), Math.sin(angle)));
+        }
     }
 
 
     protected updateAI(ev : GameEvent) {
         
         const MOUTH_TIME = 20;
-        const BULLET_SPEED = 1.0;
 
         if (!this.shooting) {
 
@@ -376,8 +400,7 @@ class Fungus extends Enemy {
                 this.shooting = true;
                 this.spr.setFrame(1, this.spr.getRow());
                 
-                this.shootBullet(1, 2, this.pos.x, this.pos.y - 4, 
-                    BULLET_SPEED, this.dir);
+                this.shootBullets(ev);
             }
         }
         else {
@@ -385,7 +408,7 @@ class Fungus extends Enemy {
             this.spr.animate(this.spr.getRow(), 1, 0, MOUTH_TIME, ev.step);
             if (this.spr.getColumn() == 0) {
 
-                this.shootTimer += Fungus.SHOOT_TIME;
+                this.shootTimer += this.shootTime;
                 this.shooting = false;
             }
         }
@@ -396,4 +419,80 @@ class Fungus extends Enemy {
 
         this.dir = Vector2.direction(this.pos, pl.getPos());
     }
+}
+
+
+class Fungus extends CoreMushroom {
+
+    constructor(x : number, y : number) {
+
+        super(x, y, 6, 1, 1, 0, 100, 10);
+    }
+}
+
+
+
+class FatFungus extends CoreMushroom {
+
+    constructor(x : number, y : number) {
+
+        super(x, y, 7, 3, 2, Math.PI/6.0, 100, 12);
+
+        this.shadowType = 0;
+    }
+}
+
+
+class Apple extends Enemy {
+
+    
+    private dir : Vector2;
+    private waveTimer : number;
+
+
+    constructor(x : number, y : number) {
+
+        super(x, y, 8, 12);
+
+        this.shadowType = 2;
+        this.spr.setFrame((Math.random() * 4) | 0, this.spr.getRow());
+
+        this.friction = new Vector2(0.025, 0.025);
+        this.dir = new Vector2(0, 1);
+
+        this.radius = 4;
+        this.damage = 3;
+
+        this.hitbox = new Vector2(6, 4);
+        this.collisionBox = this.hitbox.clone();
+        this.damageBox = new Vector2(10, 10);
+
+        this.avoidWater = false;
+
+        this.waveTimer = Math.random() * Math.PI * 2;
+    }
+
+
+    protected updateAI(ev : GameEvent) {
+        
+        const ANIM_SPEED = 4;
+        const MOVE_SPEED = 0.25;
+        const WAVE_SPEED = 0.10;
+        const AMPLITUDE = 1;
+
+        this.spr.animate(this.spr.getRow(), 0, 3, ANIM_SPEED, ev.step);
+
+        this.target = Vector2.scalarMultiply(this.dir, MOVE_SPEED);
+        this.flip = this.target.x < 0 ? Flip.None : Flip.Horizontal;
+
+        this.waveTimer = (this.waveTimer + WAVE_SPEED*ev.step) % (Math.PI * 2);
+        this.shift.y = Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
+    }
+
+
+    protected playerEvent(pl : Player, ev : GameEvent) {
+
+        this.dir = Vector2.direction(this.pos, pl.getPos());
+    }
+
 }

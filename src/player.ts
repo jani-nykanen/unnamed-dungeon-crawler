@@ -625,8 +625,8 @@ class Player extends CollisionObject {
         c.setGlobalAlpha(0.67);
         c.drawBitmapRegion(shadow, 
             0, 0, 16, 8,
-            px - shadow.width/4, 
-            py - shadow.height/2);
+            px - 8, 
+            py - 4);
         c.setGlobalAlpha();
 
         // Flicker if hurt

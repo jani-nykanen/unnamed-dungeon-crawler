@@ -42,7 +42,7 @@ class Collectible extends CollisionObject {
         this.exist = false;
     
         this.spr = new Sprite(16, 16);
-        this.hitbox = new Vector2(8, 8);
+        this.hitbox = new Vector2(10, 10);
     }
 
 
