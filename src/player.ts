@@ -731,6 +731,9 @@ class Player extends CollisionObject {
         let y = cam.getWorldPos().y + cam.height / 2 + YOFF;
 
         this.pos = new Vector2(x, y);
+
+        this.faceDirection = new Vector2(0, -1);
+        this.faceColumn = 2;
     }
 
 

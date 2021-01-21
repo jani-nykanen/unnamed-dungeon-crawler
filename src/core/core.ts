@@ -11,10 +11,13 @@ class GameEvent {
     public readonly step : number;
     private readonly input : InputManager;
     private readonly assets : AssetManager;
+    private readonly core : Core;
 
 
-    constructor(step : number, input : InputManager, assets : AssetManager) {
+    constructor(step : number, core : Core, 
+        input : InputManager, assets : AssetManager) {
 
+        this.core = core;
         this.step = step;
         this.input = input;
         this.assets = assets;
@@ -36,6 +39,12 @@ class GameEvent {
     public getTilemap(name : string) : Tilemap {
 
         return this.assets.getTilemap(name);
+    }
+
+
+    public changeScene(newScene : Function) {
+
+        this.core.changeScene(newScene);
     }
 }
 
@@ -67,7 +76,7 @@ class Core {
             .addAction("right", "ArrowRight", 15)
             .addAction("down", "ArrowDown", 13),
 
-        this.ev = new GameEvent(frameSkip+1, this.input, this.assets);
+        this.ev = new GameEvent(frameSkip+1, this, this.input, this.assets);
 
         this.timeSum = 0.0;
         this.oldTime = 0.0;
@@ -182,5 +191,12 @@ class Core {
         this.activeSceneType = initialScene;
 
         this.loop(0);
+    }
+
+
+    public changeScene(newScene : Function) {
+
+        let param = this.activeScene.dispose();
+        this.activeScene = new newScene.prototype.constructor(param, this.ev);
     }
 }

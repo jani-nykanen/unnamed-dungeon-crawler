@@ -56,6 +56,8 @@ class Stage {
     private roomCountY : number;
     private startPos : Vector2;
 
+    private roomMapCount : number;
+
 
     constructor(roomCountX : number, roomCountY : number, cam : Camera, ev : GameEvent) {
 
@@ -76,6 +78,8 @@ class Stage {
         this.startPos = roomMap.getStartPos();
         cam.setPos(this.startPos.x, this.startPos.y);
         
+        this.roomMapCount = this.computeRoomMapCount(ev);
+
         let wallData : Tilemap;
         let roomData : Tilemap;
         for (let y = 0; y < roomCountY; ++ y) {
@@ -90,7 +94,7 @@ class Stage {
                 else {
                     
                     wallData = baseRoom;
-                    roomData = ev.getTilemap("room" + String(1 + (Math.random() * ROOM_MAP_COUNT) | 0));
+                    roomData = ev.getTilemap("room" + String(1 + (Math.random() * this.roomMapCount) | 0));
                 }
 
                 this.buildRoom(x, y, this.rooms[y * roomCountX + x], 
@@ -103,6 +107,18 @@ class Stage {
         this.waterPos = 0;
 
         this.computePreservedTiles();
+    }
+
+
+    private computeRoomMapCount(ev : GameEvent ) : number {
+
+        let num = 0;
+        for (;; ++ num) {
+
+            if (ev.getTilemap("room" + String(1 + num)) == null)
+                break; 
+        }
+        return num;
     }
 
 
@@ -478,7 +494,7 @@ class Stage {
 
         // TEMP
         const MIN_ENEMY_COUNT = 1;
-        const MAX_ENEMY_COUNT = 3;
+        const MAX_ENEMY_COUNT = 5;
 
         for (let y = 0; y < this.roomCountY; ++ y) {
 

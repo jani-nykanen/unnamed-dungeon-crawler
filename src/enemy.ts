@@ -164,6 +164,9 @@ abstract class Enemy extends CollisionObject {
     }
 
 
+    protected killEvent(ev : GameEvent) {}
+
+
     private kill(ev : GameEvent) {
 
         const COLLECTIBLE_PROBABILITY = 0.5;
@@ -172,6 +175,8 @@ abstract class Enemy extends CollisionObject {
         this.hurtTimer = 0;
         this.dying = true;
         this.flip = Flip.None;
+
+        this.killEvent(ev);
 
         // Spawn a collectible
         let collectibleType = determineGeneratedColletibleId(COLLECTIBLE_PROBABILITY);

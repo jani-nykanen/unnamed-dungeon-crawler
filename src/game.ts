@@ -13,13 +13,15 @@ class Game implements Scene {
     private stage : Stage;
     private status : PlayerStatus;
 
+    private paused : boolean;
+
 
     constructor(param : any, ev : GameEvent) {
 
         const MAP_WIDTH = 6;
         const MAX_HEIGHT = 8;
 
-        this.status = new PlayerStatus(10, 3, 0, 300);
+        this.status = new PlayerStatus(10, 5, 0, 300);
 
         this.objects = new ObjectManager(this.status);
         this.cam = new Camera(0, 0, 160, 128);
@@ -27,11 +29,18 @@ class Game implements Scene {
 
         this.objects.generateObjects(this.stage);
         this.objects.initialize(this.cam);
+
+        this.paused = false;
     }
 
 
     public refresh(ev : GameEvent) : void {
         
+        if (ev.getAction("start") == State.Pressed)
+            this.paused = !this.paused;
+
+        if (this.paused) return;
+
         this.cam.update(ev);
         if (this.cam.isMoving()) {
 
@@ -99,6 +108,15 @@ class Game implements Scene {
 
         c.moveTo();
         this.drawHUD(c);
+
+        if (this.paused) {
+
+            c.setFillColor(0, 0, 0, 0.67);
+            c.fillRect(0, 0, c.width, c.height);
+
+            c.drawText(c.getBitmap("font"), "PAUSED",
+                c.width/2, c.height/2 - 12, 0, 0, true);
+        }
     }
 
 

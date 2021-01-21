@@ -5,11 +5,6 @@
  */
 
 
-// TODO: Move this to "loadAssets" and determine
-// available amount of maps other way in stage.ts
-const ROOM_MAP_COUNT = 6;
-
-
 const setActions = (core : Core) => {
 
     core.addInputAction("fire2", "KeyZ", 2)
@@ -22,6 +17,8 @@ const setActions = (core : Core) => {
 
 
 const loadAssets = (core : Core) => {
+
+    const ROOM_MAP_COUNT = 9;
 
     // Bitmaps
     [
@@ -57,5 +54,5 @@ window.onload = () : void => {
     setActions(core);
     loadAssets(core);
 
-    core.run(Game);
+    core.run(TitleScreen);
 }

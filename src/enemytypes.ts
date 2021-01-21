@@ -561,6 +561,22 @@ class SkullSlime extends Enemy {
     }
 
 
+    protected killEvent(ev : GameEvent) {
+
+        const COUNT = 8;
+        const BULLET_SPEED = 2.0;
+
+        let angle : number;
+        for (let i = 0; i < COUNT; ++ i) {
+
+            angle = Math.PI*2 / COUNT * i;
+
+            this.shootBullet(3, 2, this.pos.x, this.pos.y - 4,
+                BULLET_SPEED, new Vector2(Math.cos(angle), Math.sin(angle)));
+        }
+    }
+
+
     protected updateAI(ev : GameEvent) {
         
         const ANIM_SPEED = 12;
