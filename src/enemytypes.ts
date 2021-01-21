@@ -445,9 +445,15 @@ class FatFungus extends CoreMushroom {
 
 class Apple extends Enemy {
 
+
+    static SHOOT_TIME = 120;
+
     
     private dir : Vector2;
+    private forward : boolean;
     private waveTimer : number;
+    private shootTimer : number;
+    private mouthTimer : number;
 
 
     constructor(x : number, y : number) {
@@ -463,6 +469,8 @@ class Apple extends Enemy {
         this.radius = 4;
         this.damage = 3;
 
+        this.forward = true;
+
         this.hitbox = new Vector2(6, 4);
         this.collisionBox = this.hitbox.clone();
         this.damageBox = new Vector2(10, 10);
@@ -470,29 +478,58 @@ class Apple extends Enemy {
         this.avoidWater = false;
 
         this.waveTimer = Math.random() * Math.PI * 2;
+
+        this.shootTimer = Apple.SHOOT_TIME / 2 + ((Math.random() * Apple.SHOOT_TIME/2) | 0);
+        this.mouthTimer = 0;
     }
 
 
     protected updateAI(ev : GameEvent) {
         
         const ANIM_SPEED = 4;
-        const MOVE_SPEED = 0.25;
+        const MOVE_SPEED = 0.33;
         const WAVE_SPEED = 0.10;
         const AMPLITUDE = 1;
+        const BULLET_SPEED = 1.5;
+        const MOUTH_TIME = 20;
 
-        this.spr.animate(this.spr.getRow(), 0, 3, ANIM_SPEED, ev.step);
+        let start = this.mouthTimer > 0 ? 4 : 0;
+        this.spr.animate(this.spr.getRow(), 
+            start, start+3, ANIM_SPEED, ev.step);
 
-        this.target = Vector2.scalarMultiply(this.dir, MOVE_SPEED);
-        this.flip = this.target.x < 0 ? Flip.None : Flip.Horizontal;
+        this.target = Vector2.scalarMultiply(this.dir, 
+            MOVE_SPEED * (this.forward ? 1 : -1));
+
+        this.flip = this.dir.x < 0 ? Flip.None : Flip.Horizontal;
 
         this.waveTimer = (this.waveTimer + WAVE_SPEED*ev.step) % (Math.PI * 2);
         this.shift.y = Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
+
+        if (this.mouthTimer > 0) {
+
+            if ((this.mouthTimer -= ev.step) <= 0) {
+                
+                this.spr.setFrame(this.spr.getColumn()-4, this.spr.getRow(), true);
+            }
+        }
+
+        if ((this.shootTimer -= ev.step) <= 0) {
+
+            this.shootBullet(1, 2, this.pos.x, this.pos.y-4,
+                BULLET_SPEED, this.dir);
+
+            this.shootTimer += Apple.SHOOT_TIME;
+            this.mouthTimer = MOUTH_TIME;
+
+            this.spr.setFrame(this.spr.getColumn()+4, this.spr.getRow(), true);
+        }
     }
 
 
     protected playerEvent(pl : Player, ev : GameEvent) {
 
         this.dir = Vector2.direction(this.pos, pl.getPos());
+        this.forward = !pl.isAttacking() && !pl.isReadyingSpinAttack();
     }
 
 }

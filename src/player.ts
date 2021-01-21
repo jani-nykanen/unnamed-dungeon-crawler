@@ -775,6 +775,13 @@ class Player extends CollisionObject {
                 this.flip = this.speed.x < 0 ? Flip.None : Flip.Horizontal;
             }
             this.spr.setFrame(column, 10);
+
+            this.attacking = false;
+            this.usingMagic = false;
+            this.readyingSpinAttack = false;
+            this.spinAttackTimer = 0;
+            this.spinning = false;
+            this.rolling = false;
         }
 
         this.status.reduceHealth(dmg);
@@ -832,4 +839,8 @@ class Player extends CollisionObject {
     public recoverHealth = (count : number) => this.status.recoverHealth(count);
     public addGemStones = (count : number) => this.status.addGemStones(count);
     public addBullets = (count : number) => this.status.addBullets(count);
+
+    public isAttacking = () : boolean => this.attacking || this.usingMagic;
+    public isRolling = () : boolean => this.rolling;
+    public isReadyingSpinAttack = () : boolean => this.readyingSpinAttack;
 }
