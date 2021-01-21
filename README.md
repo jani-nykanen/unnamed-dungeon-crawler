@@ -1,6 +1,6 @@
 ### Unnamed (and abandoned) Dungeon Crawler Roguelite project
 
-[https://jani-nykanen.github.io/unnamed-dungeon-crawler/](You can play the prototype by clicking this sentence)
+[You can play the prototype by clicking this sentence](https://jani-nykanen.github.io/unnamed-dungeon-crawler/)
 
 This was supposed to be a 2D dungeon crawler arcade hack-n-slash roguelite, but I lost motivation to work on it. 
 
